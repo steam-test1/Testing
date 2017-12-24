@@ -1,7 +1,7 @@
 # Payday 2 BLT
-An open source Lua hook for Payday 2, designed and created for ease of use for both players and modders.  
+An open source Lua hook for Payday 2, designed and created for ease of use for both players and modders.
 This is the developer repository, and should only be used if you know what you're doing. If you don't, visit the website at [PaydayMods.com](http://paydaymods.com/) to get an up-to-date drag-drop install.  
-The Lua component of the BLT which controls mod loading can be found in it's own repository, [Payday-2-BLT-Lua](https://github.com/JamesWilko/Payday-2-BLT-Lua).
+The Lua component of the BLT which controls mod loading can be found in its own repository, [Payday-2-SuperBLT-Lua](https://gitlab.com/znixian/payday2-superblt).
 
 ## Download
 Visit [PaydayMods.com](http://paydaymods.com/) to get the latest stable download.  

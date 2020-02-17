@@ -125,7 +125,7 @@ namespace pd2hook
 	void run_http_event(std::unique_ptr<HTTPItem> ourItem)
 	{
 		PD2HOOK_TRACE_FUNC;
-		ourItem->call(ourItem->data, ourItem->httpContents);
+		ourItem->call(ourItem->data, ourItem->httpContents, ourItem->errorCode);
 	}
 
 	void launch_thread_http(HTTPItem *raw_item)
@@ -133,7 +133,6 @@ namespace pd2hook
 		PD2HOOK_TRACE_FUNC;
 		std::unique_ptr<HTTPItem> item(raw_item);
 		CURL *curl;
-		CURLcode res;
 		curl = curl_easy_init();
 		curl_easy_setopt(curl, CURLOPT_URL, item->url.c_str());
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -158,14 +157,10 @@ namespace pd2hook
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_http_data);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, item.get());
 
-		res = curl_easy_perform(curl);
+		item->errorCode = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 
-		if (res == CURLE_OK)
-		{
-			// Only run the download finished event if no errors occured
-			GetHTTPItemQueue().AddToQueue(run_http_event, std::move(item));
-		}
+		GetHTTPItemQueue().AddToQueue(run_http_event, std::move(item));
 	}
 
 	void HTTPManager::LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback)

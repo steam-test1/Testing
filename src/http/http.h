@@ -12,7 +12,7 @@ namespace pd2hook
 
 	void download_blt();
 
-	typedef void(*HTTPCallback)(void* data, std::string& urlContents);
+	typedef void(*HTTPCallback)(void* data, std::string& urlContents, int errorCode);
 	typedef void(*HTTPProgress)(void* data, long progress, long total);
 
 	struct HTTPItem
@@ -21,6 +21,7 @@ namespace pd2hook
 		HTTPProgress progress = nullptr;
 		std::string url;
 		std::string httpContents;
+		int errorCode;
 		void* data = nullptr;
 
 		long byteprogress = 0;

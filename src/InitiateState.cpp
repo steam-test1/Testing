@@ -337,7 +337,7 @@ namespace pd2hook
 		lua_State* L;
 	};
 
-	void return_lua_http(void* data, std::string& urlcontents)
+	void return_lua_http(void* data, std::string& urlcontents, int errorCode)
 	{
 		lua_http_data* ourData = (lua_http_data*)data;
 		if (!check_active_state(ourData->L))
@@ -349,7 +349,8 @@ namespace pd2hook
 		lua_rawgeti(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		lua_pushlstring(ourData->L, urlcontents.c_str(), urlcontents.length());
 		lua_pushinteger(ourData->L, ourData->requestIdentifier);
-		handled_pcall(ourData->L, 2, 0);
+		lua_pushinteger(ourData->L, errorCode);
+		handled_pcall(ourData->L, 3, 0);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->progressRef);
 		delete ourData;

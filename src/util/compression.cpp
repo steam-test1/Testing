@@ -129,7 +129,6 @@ namespace pd2hook
 		bool WriteFile(const std::string& extractPath, const ZIPFileData& data)
 		{
 			const std::string finalWritePath = extractPath + "/" + data.filepath;
-			PD2HOOK_LOG_LOG("Extracting to " << finalWritePath);
 			Util::EnsurePathWritable(finalWritePath);
 
 			std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
@@ -155,6 +154,8 @@ namespace pd2hook
 				files.push_back(std::move(file));
 			}
 		}
+
+		PD2HOOK_LOG_LOG(std::string("Extracting ") + path + std::string(" to ") + extractPath);
 
 		bool result = true;
 		std::for_each(files.cbegin(), files.cend(), [extractPath, &result](const std::unique_ptr<ZIPFileData>& data)

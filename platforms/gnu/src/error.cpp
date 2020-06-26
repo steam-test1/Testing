@@ -19,12 +19,12 @@ namespace blt
 		using std::string;
 		using std::endl;
 
+		__thread lua_state *current_thread_lua;
+
 		// Based off the debug.traceback function
-		static void traceback (lua_state *L, void (print)(string))
+		static void traceback (lua_state *L, void (print)(string), int level=1)
 		{
 			lua_Debug ar;
-
-			int level = 1;
 
 			print("stack traceback:");
 			std::stringstream buff;
@@ -186,6 +186,8 @@ namespace blt
 
 		void push_callback(lua_state* state)
 		{
+			current_thread_lua = state;
+
 			const char *key = "mods.superblt.err_handler";
 
 			lua_getfield(state, LUA_REGISTRYINDEX, key);
@@ -205,6 +207,10 @@ namespace blt
 			std::stringstream info;
 			info << "Segmentation fault!" << endl;
 			produce_error_file(info.str());
+
+			log::log("Thread Lua state:", log::LOG_ERROR);
+			traceback(current_thread_lua, errlog, 0);
+
 			abort();
 		}
 

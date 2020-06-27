@@ -228,6 +228,7 @@ namespace blt
 		void set_global_handlers()
 		{
 			signal(SIGSEGV, handler);
+			signal(SIGABRT, handler);
 			std::set_terminate( myterminate );
 		}
 

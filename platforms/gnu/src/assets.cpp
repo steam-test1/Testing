@@ -27,7 +27,6 @@ using namespace dsl;
 
 namespace blt
 {
-
 	// Represents a single custom asset
 	class asset_t
 	{
@@ -182,7 +181,7 @@ func(5);
 	static void (*dsl_db_add_members)   (lua_state*);
 	static void (*dsl_fss_open) (Archive *output, FileSystemStack **_this, libcxxstring const*);
 
-	static void (*archive_ctor) (Archive *_this, libcxxstring const *name, dsl::CustomDataStore *datastore, size_t start_pos, size_t size, bool probably_write_flag, void* ukn);
+	static void (*archive_ctor) (Archive *_this, libcxxstring const &name, dsl::CustomDataStore *datastore, size_t start_pos, size_t size, bool probably_write_flag, void* ukn);
 
 	typedef void* (*try_open_t) (Archive *target, DB *db, idstring *ext, idstring *name, void *template_obj /* Misc depends on the template type */, Transport *transport);
 	typedef void* (*do_resolve_t) (DB *_this, idstring*, idstring*, void *template_obj, void *unknown);
@@ -262,7 +261,7 @@ func(5);
 				// Create an archive using our datastore, in the memory location passed in (this is how
 				// an object is returned in C++ - memory is allocated by the caller, and the pointer is passed
 				// in the first argument, even before "this").
-				archive_ctor(target, &cxxstr, datastore, 0, datastore->size(), false, nullptr);
+				archive_ctor(target, cxxstr, datastore, 0, datastore->size(), false, nullptr);
 				return target;
 			}
 
@@ -413,4 +412,3 @@ func(5);
 };
 
 /* vim: set ts=4 sw=4 noexpandtab: */
-

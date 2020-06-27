@@ -23,6 +23,7 @@ extern "C" {
 #include <InitState.h>
 #include <lua_functions.h>
 #include <util/util.h>
+#include <dbutil/DB.h>
 
 #include <tweaker/xmltweaker.h> // TODO move into the standard interface API
 
@@ -158,6 +159,9 @@ namespace blt
 	void
 	blt_init_hooks(void* dlHandle)
 	{
+		// Load this first, so if something goes wrong we don't have to wait for the game to start
+		blt::db::DieselDB::Instance();
+
 		// First thing to do, install error handlers so if we crash we can generate a nice stacktrace
 		log::log("Installing SuperBLT error handlers", log::LOG_INFO);
 		error::set_global_handlers();

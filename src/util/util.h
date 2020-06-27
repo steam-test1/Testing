@@ -39,6 +39,9 @@ namespace pd2hook
 		std::string GetFileHash(std::string filename);
 		bool MoveDirectory(const std::string & path, const std::string & destination);
 
+		template<typename T>
+		std::string ToHex(T num);
+
 		// See hashing.cpp
 		typedef std::string(*DirectoryHashFunction)(std::string);
 		typedef void(*HashResultReceiver)(lua_State* L, int ref, std::string filename, std::string result);

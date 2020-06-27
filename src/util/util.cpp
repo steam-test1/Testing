@@ -112,5 +112,13 @@ namespace pd2hook
 			return sha256(hash);
 		}
 
+		template<>
+		std::string ToHex(uint64_t value)
+		{
+			std::stringstream ss;
+			ss << std::hex << std::setw(16) << std::setfill('0') << value;
+			return ss.str();
+		}
+
 	}
 }

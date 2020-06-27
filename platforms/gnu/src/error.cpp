@@ -208,6 +208,9 @@ namespace blt
 			info << "Segmentation fault!" << endl;
 			produce_error_file(info.str());
 
+			// Since the state might be invalid, ignore segfaults caused by it
+			signal(SIGSEGV, SIG_IGN);
+
 			log::log("Thread Lua state:", log::LOG_ERROR);
 			traceback(current_thread_lua, errlog, 0);
 

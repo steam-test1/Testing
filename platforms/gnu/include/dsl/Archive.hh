@@ -1,5 +1,7 @@
 #pragma once
 
+#include <blt/libcxxstring.hh>
+
 namespace dsl
 {
 	class DataStore;
@@ -21,6 +23,17 @@ namespace dsl
 		void read_ln(std::string*);
 		void read_str(std::string*);
 		void size() const;
+
+		// Variables
+		blt::libcxxstring str;
+		size_t position_in_bundle;
+		size_t size_var;
+		size_t read_counter;
+		bool probably_not_loaded_flag;
+		char null1[15];
+		char lock[40];
+		DataStore *datastore;
+		uint64_t datastore_safe_counter_id;
 	};
 };
 

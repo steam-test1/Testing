@@ -32,6 +32,8 @@ namespace pd2hook::scriptdata::tools
 			return s->tellp();
 		}
 
+		bool fake_write_mode = false;
+
 	private:
 		std::unique_ptr<std::stringstream> s;
 		std::ostream *main;

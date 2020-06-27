@@ -9,6 +9,11 @@
 #include <functional>
 #include <memory>
 
+// Testing
+#include <chrono>
+
+#include "util/util.h"
+
 namespace pd2hook::scriptdata
 {
 	using namespace tools;
@@ -285,24 +290,29 @@ namespace pd2hook::scriptdata
 	class SItem::write_info
 	{
 	public:
-		uint32_t IndexOf(const SItem *item)
+		uint32_t IndexOf(const SItem *item, bool *added = nullptr)
 		{
-			std::vector<const SItem*> &oftype = items[item->GetId()];
+			if(added) *added = false;
 
-			std::vector<const SItem*>::iterator index = std::find(oftype.begin(), oftype.end(), item);
+			std::map<const SItem*, int> &oftype_indexes = item_positions[item->GetId()];
 
-			if(index == oftype.end())
-			{
-				if (frozen)
-				{
-					throw "Cannot add item after freeze";
-				}
-
-				oftype.push_back(item);
-				addflag = true;
+			auto existing_idx = oftype_indexes.find(item);
+			if (existing_idx != oftype_indexes.end()) {
+				return existing_idx->second;
 			}
 
-			return index - oftype.begin();
+			std::vector<const SItem*> &oftype = items[item->GetId()];
+
+			if (frozen)
+			{
+				throw "Cannot add item after freeze";
+			}
+
+			int idx = oftype.size();
+			oftype_indexes[item] = idx;
+			oftype.push_back(item);
+			if (added) *added = true;
+			return idx;
 		}
 
 		const std::vector<const SItem*> &ListOf(int id)
@@ -324,9 +334,6 @@ namespace pd2hook::scriptdata
 
 		explicit write_info(bool use32bit) : use32bit(use32bit) {}
 		write_info(write_info&) = delete;
-
-		// Set to true after adding something
-		bool addflag = false;
 
 		write_block& create_block()
 		{
@@ -371,6 +378,7 @@ namespace pd2hook::scriptdata
 
 	private:
 		std::map<int, std::vector<const SItem*>> items;
+		std::map<int, std::map<const SItem*, int>> item_positions;
 		std::vector<std::unique_ptr<write_block>> blocks;
 		std::vector<linkage> linkages;
 
@@ -427,27 +435,28 @@ namespace pd2hook::scriptdata
 			}
 		};
 
+		//PD2HOOK_LOG_LOG("S:0");
+		auto timer = std::chrono::high_resolution_clock::now();
+		auto printtime = [&timer](std::string name) {
+			auto now = std::chrono::high_resolution_clock::now();
+			long time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer).count();
+			std::string str = name + " : " + std::to_string(time_ms);
+			//PD2HOOK_LOG_LOG(str.c_str());
+			timer = now;
+		};
+
 		write_info data(use32bit);
 
-		// Write this item (and all it's prerequesites) into the data lists
-		{
-			write_block temp;
-			writeRef(temp, &data, this);
+		printtime("S:1");
 
-			// To make sure we hit all the items, keep going until no more are added
-			do
-			{
-				data.addflag = false;
-				for(auto pair : data.Items())
-				{
-					for(const SItem *item : pair.second)
-					{
-						item->Serialise(temp, data);
-					}
-				}
-			}
-			while(data.addflag);
-		}
+		// Explore the dependency tree between objects, to make sure we've found everything
+		Register([&data](const SItem *item) {
+			bool added;
+			data.IndexOf(item, &added);
+			return added;
+		});
+
+		printtime("S:2");
 
 		// Freeze them while serialising
 		data.freeze();
@@ -458,6 +467,8 @@ namespace pd2hook::scriptdata
 		// Allocator pointer
 		// Written over during loading, afaik we can put anything here
 		writePtr(out, use32bit, 0);
+
+		printtime("S:3");
 
 		static_assert(sizeof(float) == 4, "incompatible float size");
 		// Write float array
@@ -481,8 +492,12 @@ namespace pd2hook::scriptdata
 		// Write reference to initial item
 		writeRef(out, &data, this);
 
+		printtime("S:4");
+
 		std::stringstream outstream;
 		data.apply_blocks(outstream);
+
+		printtime("S:5");
 
 		return outstream.str();
 	}
@@ -569,4 +584,19 @@ namespace pd2hook::scriptdata
 		}
 	}
 
+	void STable::Register(RegReceiver receiver) const
+	{
+		// Try to add ourselves, if we've already been added then bail to avoid infinite recursion if we contain ourselves
+		bool added = receiver(this);
+		if(!added) return;
+
+		if(meta)
+			meta->Register(receiver);
+
+		for(std::pair<const SItem*, const SItem*> pair : items)
+		{
+			pair.first->Register(receiver);
+			pair.second->Register(receiver);
+		}
+	}
 };

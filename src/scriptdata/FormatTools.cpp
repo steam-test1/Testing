@@ -25,11 +25,15 @@ namespace pd2hook::scriptdata::tools
 
 	write_block::write_block()
 	{
+		if(fake_write_mode) return;
+
 		s.reset(new std::stringstream());
 	}
 
 	void write_block::write_to(std::ostream &stream)
 	{
+		if(fake_write_mode) return;
+
 		offset = stream.tellp();
 		stream << s->str();
 		s.reset();

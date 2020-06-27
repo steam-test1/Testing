@@ -2,6 +2,7 @@
 
 #include "FormatTools.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <map>
@@ -24,6 +25,13 @@ namespace pd2hook::scriptdata
 
 		// For internal use, don't actually use this
 		class write_info;
+
+		typedef std::function<bool(const SItem*)> const& RegReceiver;
+		virtual void Register(RegReceiver receiver) const
+		{
+			// Fine for plain types, container types must override!
+			receiver(this);
+		};
 	protected:
 		virtual void Serialise(tools::write_block &out, write_info &info) const = 0;
 	};
@@ -179,6 +187,7 @@ namespace pd2hook::scriptdata
 
 	protected:
 		virtual void Serialise(tools::write_block &out, write_info &info) const override;
+		virtual void Register(RegReceiver receiver) const override;
 	};
 
 	class ScriptData

@@ -16,11 +16,15 @@
 #include <dsl/Archive.hh>
 #include <dsl/DB.hh>
 #include <dsl/Transport.hh>
+#include <dsl/Package.hh>
 
 #include <scriptdata/ScriptData.h>
 #include <scriptdata/FontData.h>
 
 #define hook_remove(hookName) subhook::ScopedHookRemove _sh_remove_raii(&hookName)
+
+PackageManager::find_t PackageManager::find = nullptr;
+PackageManager::resource_t PackageManager::resource = nullptr;
 
 using namespace std;
 using namespace dsl;
@@ -346,6 +350,10 @@ func(5);
 
 		// The archive constructor
 		setcall(archive_ctor, _ZN3dsl7ArchiveC1ERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPNS_9DataStoreExxbx);
+
+		// The unit creation hooking
+		setcall(PackageManager::find, _ZN14PackageManager4findERKNSt3__112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE);
+		setcall(PackageManager::resource, _ZN14PackageManager8resourceERKN3dsl10ResourceIDE);
 #undef setcall
 
 		// Add the 'add_members' hook

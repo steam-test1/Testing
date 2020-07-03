@@ -7,3 +7,9 @@
 [submodule "lib/subhook"]
 	path = lib/subhook
 	url = https://github.com/Zeex/subhook.git
+[submodule "lib/sys/zlib"]
+	path = lib/sys/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "lib/sys/openalsoft"]
+	path = lib/sys/openalsoft
+	url = https://github.com/kcat/openal-soft.git

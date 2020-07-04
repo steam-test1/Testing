@@ -121,6 +121,34 @@ target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
 if(WIN32)
+	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
+	# is inconvenient on Windows. Here's the download URL:
+	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz
+	set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.2.0)
+	set(LSSL_TARBALL ${LSSL_SRCDIR}.tar.gz)
+	if(NOT EXISTS ${LSSL_TARBALL})
+		# TODO move this to my (ZNix's) server, in case the paths ever change
+		message("Downloading LibreSSL")
+		file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz" ${LSSL_TARBALL}
+			TIMEOUT 60  # seconds
+			EXPECTED_HASH SHA256=47bd2eb4b4503e47c02efa7e67d2fcd95c7eac6bc9d06b343a1b4705793ed1d5
+			TLS_VERIFY ON
+		)
+	endif()
+	if(NOT EXISTS ${LSSL_SRCDIR})
+		message("Extracting LibreSSL")
+		execute_process(
+			COMMAND 7z x ${LSSL_TARBALL} -so
+			COMMAND 7z x -ttar -si "-o${CMAKE_CURRENT_SOURCE_DIR}/lib/sys"
+			RESULT_VARIABLE LSSL_EXTRACT_OUT
+		)
+		message(${LSSL_EXTRACT_OUT})
+	endif()
+
+	######
+	###### Dependency stuff
+	######
+
 	# # zlib requires an old version of cmake before target_include_directories was added
 	add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 	target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
@@ -133,10 +161,6 @@ if(WIN32)
 	target_link_libraries(SuperBLT OpenAL)
 	# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
-	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
-	# is inconvenient on Windows. Here's the download URL:
-	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz
-	# TODO add this to the readme, or even do it automatically
 	add_subdirectory(lib/sys/libressl-3.2.0 EXCLUDE_FROM_ALL)
 	target_link_libraries(SuperBLT crypto)
 

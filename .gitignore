@@ -5,6 +5,7 @@
 
 # LibreSSL, since it's extracted from a tarball and not a git submodule
 /lib/sys/libressl-3.2.0
+/lib/sys/libressl-3.2.0.tar.gz
 
 # CMake build directory
 /build/

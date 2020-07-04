@@ -119,33 +119,44 @@ target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
 if(WIN32)
-	set(ZLIB_ROOT $ENV{ZLIB_ROOT} $ENV{ZLIB_ROOT}/Release)
-	set(ZLIB_LIBRARY $ENV{ZLIB_ROOT}/Release/zlibstatic.lib) # Force the static version of ZLib
-	set(CURL_INCLUDE_DIR $ENV{CURL_INCLUDE_DIR})
-	set(CURL_LIBRARY $ENV{CURL_LIBRARY})
-	set(OPENSSL_ROOT_DIR $ENV{OPENSSL_ROOT_DIR})
-	set(OPENAL_LIBRARY $ENV{OpenALSoft_ROOT}/build/Release/OpenAL32.lib)
-	set(OPENAL_INCLUDE_DIR $ENV{OpenALSoft_ROOT}/include)
+	# # zlib requires an old version of cmake before target_include_directories was added
+	add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
+	target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
+	target_link_libraries(SuperBLT zlibstatic)
 
-	# Use static libs on Windows
-	set(OPENSSL_USE_STATIC_LIBS true)
+	# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
+	set(LIBTYPE SHARED)
+	add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
+	target_link_libraries(SuperBLT OpenAL)
+	# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
+
+	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
+	# is inconvenient on Windows. Here's the download URL:
+	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz
+	# TODO add this to the readme, or even do it automatically
+	add_subdirectory(lib/sys/libressl-3.2.0 EXCLUDE_FROM_ALL)
+	target_link_libraries(SuperBLT crypto)
+
+	add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
+	set(BUILD_SHARED_LIBS no) # Again, it's not really designed to be used as a subproject
+	target_link_libraries(SuperBLT libcurl)
+else()
+	find_package(ZLIB REQUIRED)
+	include_directories (${ZLIB_INCLUDE_DIRS})
+	target_link_libraries(SuperBLT ${ZLIB_LIBRARIES})
+
+	find_package (CURL REQUIRED)
+	include_directories (${CURL_INCLUDE_DIRS})
+	target_link_libraries(SuperBLT ${CURL_LIBRARY})
+
+	find_package (OpenSSL REQUIRED)
+	include_directories (${OPENSSL_INCLUDE_DIR})
+	target_link_libraries(SuperBLT ${OPENSSL_LIBRARIES})
+
+	find_package (OpenAL REQUIRED)
+	include_directories (${OPENAL_INCLUDE_DIR})
+	target_link_libraries(SuperBLT ${OPENAL_LIBRARY})
 endif()
-
-find_package(ZLIB REQUIRED)
-include_directories (${ZLIB_INCLUDE_DIRS})
-target_link_libraries(SuperBLT ${ZLIB_LIBRARIES})
-
-find_package (CURL REQUIRED)
-include_directories (${CURL_INCLUDE_DIRS})
-target_link_libraries(SuperBLT ${CURL_LIBRARY})
-
-find_package (OpenSSL REQUIRED)
-include_directories (${OPENSSL_INCLUDE_DIR})
-target_link_libraries(SuperBLT ${OPENSSL_LIBRARIES})
-
-find_package (OpenAL REQUIRED)
-include_directories (${OPENAL_INCLUDE_DIR})
-target_link_libraries(SuperBLT ${OPENAL_LIBRARY})
 
 ###############################################################################
 ## loader binary (this generates a seperate target for both Windows loaders) ##

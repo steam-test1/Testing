@@ -1,58 +1,7 @@
-# Build Objects
-*.obj
-*.log
-*.tlog
-proj/Release/*
-proj/Debug/*
-proj/InjectorDLL/*
-proj/IPHLPAPI Override/*
-
-# VS user specific files
-proj/IPHLPAPI.sdf
-proj/IPHLPAPI.v12.suo
-proj/IPHLPAPI.vcxproj.filters
-proj/IPHLPAPI.vcxproj.user
-proj/IPHLPAPI.opensdf
-
-# VS2017 files
-proj/.vs
-
-# VS Solution
-proj/*.vcxproj.user
-
-# Library includes (excluding detours)
-/lib-win32/incl/curl/*
-/lib-win32/incl/openssl/*
-/lib-win32/incl/crc32.h
-/lib-win32/incl/deflate.h
-/lib-win32/incl/gzguts.h
-/lib-win32/incl/inffast.h
-/lib-win32/incl/inffixed.h
-/lib-win32/incl/inflate.h
-/lib-win32/incl/inftrees.h
-/lib-win32/incl/trees.h
-/lib-win32/incl/zconf.h
-/lib-win32/incl/zlib.h
-/lib-win32/incl/AL/
-/lib-win32/incl/wren.h
-
-# Library libs (excluding detours)
-/lib-win32/engines/*
-/lib-win32/libcurl.*
-/lib-win32/libcurl_a.*
-/lib-win32/libcurl_a_debug.lib
-/lib-win32/libeay32.*
-/lib-win32/ssleay32.*
-/lib-win32/zlib.*
-/lib-win32/libssl*
-/lib-win32/libcrypto*
-/lib-win32/OpenAL32.lib
-/lib-win32/mxml1.lib
-/lib-win32/wren_static.lib
-
-# Source-based libraries
-/lib-win32/mxml/
-/lib-win32/wren/
+# Visual Studio files
+/.vs
+/CMakeSettings.json
+/out
 
 # CMake build directory
 /build/

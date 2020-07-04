@@ -13,3 +13,6 @@
 [submodule "lib/sys/openalsoft"]
 	path = lib/sys/openalsoft
 	url = https://github.com/kcat/openal-soft.git
+[submodule "lib/sys/curl"]
+	path = lib/sys/curl
+	url = https://github.com/curl/curl.git

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 project(SuperBLT)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 support
@@ -38,7 +38,9 @@ set(		  gnu_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/link.ld)
 ## target definitions #########################################################
 ###############################################################################
 
-file(GLOB_RECURSE mxml_sources		lib/mxml/*.c lib/mxml/*.h)
+set(mxml_sources mxml-attr.c mxml-entity.c mxml-file.c mxml-get.c mxml-index.c
+	mxml-node.c mxml-search.c mxml-set.c mxml-private.c mxml-string.c)
+list(TRANSFORM mxml_sources PREPEND lib/mxml/)
 add_library(mxml STATIC ${mxml_sources})
 include_directories(mxml lib/configs/mxml)
 if(UNIX)

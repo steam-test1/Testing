@@ -130,7 +130,7 @@ DieselDB::DieselDB()
 	for(const fs::directory_entry &entry : fs::directory_iterator("assets"))
 	{
 		if(!entry.is_regular_file()) continue;
-		std::string name = entry.path().filename();
+		std::string name = entry.path().filename().string();
 		if(name.compare(name.size() - suffix.size(), suffix.size(), suffix) != 0) continue;
 		if(name == "all_h.bundle") continue; // all_h handling later
 		if(name.size() != 25)
@@ -140,12 +140,12 @@ DieselDB::DieselDB()
 		}
 
 		// Find the path to the data file - chop out the '_h' bit
-		std::string dataPath = entry.path();
+		std::string dataPath = entry.path().string();
 		dataPath.erase(dataPath.end() - 9, dataPath.end() - 7);
 
 		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
 		DieselBundle *bundle = new DieselBundle();
-		bundle->headerPath = entry.path();
+		bundle->headerPath = entry.path().string();
 		bundle->path = dataPath;
 		loadPackageHeader(bundle, filesList);
 	}
@@ -205,8 +205,11 @@ static void loadBundleHeader(std::string filename, FileList files)
 		dsl_Vector vec;
 		intptr_t one;
 	};
+#if defined(__x86_64__)
 	static_assert(sizeof(BundleInfo) == 48);
-	// TODO 32-bit: Should be 28 bytes wide
+#else
+	static_assert(sizeof(BundleInfo) == 28);
+#endif
 
 	struct ItemInfo
 	{

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(SuperBLT)
 
+# Allow us to attach the winmm.lib dependency to OpenAL on Windows
+cmake_policy(SET CMP0079 NEW)
+
 if(CMAKE_SYSTEM_NAME MATCHES "Linux") # Add other systems, if they get PD2 support
 	set(UNIX true)
 endif()
@@ -100,7 +103,6 @@ elseif(WIN32)
 	)
 
 	# Link against libraries
-	target_link_libraries(SuperBLT winmm.lib)
 	target_link_libraries(SuperBLT ws2_32.lib)
 	target_link_libraries(SuperBLT crypt32.lib)
 else()
@@ -127,6 +129,7 @@ if(WIN32)
 	# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
 	set(LIBTYPE SHARED)
 	add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
+	target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
 	target_link_libraries(SuperBLT OpenAL)
 	# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 

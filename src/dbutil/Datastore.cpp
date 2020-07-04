@@ -4,6 +4,12 @@
 #include <fcntl.h>
 #include <assert.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 // BLTAbstractDataStore
 
 size_t BLTAbstractDataStore::write(size_t position_in_file, uint8_t const *data, size_t length)

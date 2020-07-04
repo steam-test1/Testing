@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include <unistd.h>
 #include <stdint.h>
 
 // All this is checked on Linux, verify that it's the same on Windows

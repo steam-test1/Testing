@@ -121,6 +121,10 @@ target_link_libraries(SuperBLT wren)
 target_link_libraries(SuperBLT subhook)
 
 if(WIN32)
+	# Disable all the install targets, otherwise it causes errors when we add dependencies to curl
+	function(install)
+	endfunction()
+
 	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
 	# is inconvenient on Windows. Here's the download URL:
 	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.0.tar.gz
@@ -149,13 +153,16 @@ if(WIN32)
 	###### Dependency stuff
 	######
 
+	# Required to build LibreSSL and curl as static libraries
+	set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build as static, set by SBLT's buildscript")
+
 	# # zlib requires an old version of cmake before target_include_directories was added
 	add_subdirectory(lib/sys/zlib EXCLUDE_FROM_ALL)
 	target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
 	target_link_libraries(SuperBLT zlibstatic)
 
 	# Unfortunately cmake doesn't have namespacing, so we have to set stuff here
-	set(LIBTYPE SHARED)
+	set(LIBTYPE STATIC)
 	add_subdirectory(lib/sys/openalsoft EXCLUDE_FROM_ALL)
 	target_link_libraries(OpenAL PRIVATE winmm.lib) # Not set up by default?
 	target_link_libraries(SuperBLT OpenAL)
@@ -164,8 +171,19 @@ if(WIN32)
 	add_subdirectory(lib/sys/libressl-3.2.0 EXCLUDE_FROM_ALL)
 	target_link_libraries(SuperBLT crypto)
 
+	#### CURL ####
+	# Turn off all the crap we don't want
+	option(HTTP_ONLY "" ON)
+	option(CURL_DISABLE_CRYPTO_AUTH "" ON)
+
+	# Use WinSSL rather than our static-linked copy of LibreSSL so we can use the
+	# default Windows certificate store without any hassle
+	option(CMAKE_USE_WINSSL "" ON)
+
+	# TODO enable zlib
+
 	add_subdirectory(lib/sys/curl EXCLUDE_FROM_ALL)
-	set(BUILD_SHARED_LIBS no) # Again, it's not really designed to be used as a subproject
+	target_link_libraries(libcurl crypto ssl)
 	target_link_libraries(SuperBLT libcurl)
 else()
 	find_package(ZLIB REQUIRED)

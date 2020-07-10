@@ -30,10 +30,10 @@ file(GLOB_RECURSE win32_sources		platforms/w32/*.cpp platforms/w32/*.h)
 set(		  win32_loader_path	platforms/w32/loader)
 file(GLOB_RECURSE win32_loaders		${win32_loader_path}/*.cpp)
 list(REMOVE_ITEM  win32_sources		${win32_loaders})
-file(GLOB_RECURSE gnu_sources		platforms/gnu/src/*.cpp platforms/gnu/include/*.hh)
-set(		  gnu_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/src/blt_main.cpp)
-list(REMOVE_ITEM  gnu_sources		${gnu_loader_file})
-set(		  gnu_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/gnu/link.ld)
+file(GLOB_RECURSE linux_sources		platforms/linux/src/*.cpp platforms/linux/include/*.hh)
+set(		  linux_loader_file	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/src/blt_main.cpp)
+list(REMOVE_ITEM  linux_sources		${linux_loader_file})
+set(		  linux_link_script	${CMAKE_CURRENT_SOURCE_DIR}/platforms/linux/link.ld)
 # you can use set(sources src/main.cpp) etc if you don't want to
 # use globing to find files automatically
 
@@ -47,7 +47,7 @@ list(TRANSFORM mxml_sources PREPEND lib/mxml/)
 add_library(mxml STATIC ${mxml_sources})
 target_include_directories(mxml PRIVATE lib/configs/mxml)
 if(UNIX)
-	target_compile_options(mxml PRIVATE -std=gnu99 -Wall -fPIC)
+	target_compile_options(mxml PRIVATE -std=c99 -Wall -fPIC)
 elseif(WIN32)
 	target_compile_options(mxml PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 endif()
@@ -63,13 +63,13 @@ target_include_directories(wren PRIVATE lib/wren/src/optional lib/wren/src/vm)
 if(MSVC)
 	target_compile_options(wren PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 else()
-	target_compile_options(wren PRIVATE -std=gnu99 -Wall -fPIC)
+	target_compile_options(wren PRIVATE -std=c99 -Wall -fPIC)
 endif()
 target_include_directories(wren PUBLIC lib/wren/src/include)
 
 add_library(subhook STATIC lib/subhook/subhook.c)
 if(UNIX)
-	target_compile_options(subhook PRIVATE -std=gnu99 -Wall -fPIC)
+	target_compile_options(subhook PRIVATE -std=c99 -Wall -fPIC)
 elseif(WIN32)
 	target_compile_options(subhook PRIVATE -DSUBHOOK_EXPORT=;)
 endif()
@@ -80,8 +80,8 @@ target_include_directories(subhook PUBLIC lib/subhook)
 ###############################################################################
 
 if(UNIX)
-	add_library(SuperBLT STATIC ${sources} ${gnu_sources})
-	include_directories (platforms/gnu/include)
+	add_library(SuperBLT STATIC ${sources} ${linux_sources})
+	include_directories (platforms/linux/include)
 
 	# Use modern C++, and show all warnings
 	target_compile_options(SuperBLT PUBLIC -Wall -Werror -fPIC)
@@ -216,8 +216,8 @@ macro(Add_Loader library_name)
 		target_compile_options(${library_name} PUBLIC -Wall -Werror)
 
 		# Use a custom link script, to ensure the correct initialization order
-		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,\"${gnu_link_script}\"") # Use the link script
-		set_target_properties(${library_name} PROPERTIES LINK_DEPENDS ${gnu_link_script}) # Relink if the script is edited
+		target_link_libraries(${library_name} LINK_PRIVATE "-Wl,-T,\"${linux_link_script}\"") # Use the link script
+		set_target_properties(${library_name} PROPERTIES LINK_DEPENDS ${linux_link_script}) # Relink if the script is edited
 
 		# Print the build script for debugging - comment out the custom link script and you can use this
 		# to retrieve the original script.
@@ -226,7 +226,7 @@ macro(Add_Loader library_name)
 endmacro()
 
 if(UNIX)
-	Add_Loader("superblt_loader" ${gnu_loader_file})
+	Add_Loader("superblt_loader" ${linux_loader_file})
 elseif(WIN32)
 	Add_Loader("IPHLPAPI" ${win32_loader_path}/iphp.cpp ${win32_loader_path}/iphp.def)
 	Add_Loader("WSOCK32" ${win32_loader_path}/wsock.cpp ${win32_loader_path}/wsock.def)

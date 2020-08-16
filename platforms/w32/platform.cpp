@@ -7,6 +7,7 @@
 #include "vr/vr.h"
 #include "signatures/signatures.h"
 #include "tweaker/xmltweaker.h"
+#include "assets/assets.h"
 
 #include "subhook.h"
 
@@ -29,11 +30,11 @@ static void init_idstring_pointers()
 {
 	char *tmp;
 
-	tmp = (char*)try_open_base;
+	tmp = (char*)try_open_funcptr;
 	tmp += 0x44;
 	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
-	tmp = (char*)try_open_base;
+	tmp = (char*)try_open_funcptr;
 	tmp += 0x2A;
 	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 }
@@ -170,6 +171,7 @@ void blt::platform::InitPlatform()
 	edit_node_from_xml_hook(true);
 
 	VRManager::CheckAndLoad();
+	blt::win32::InitAssets();
 
 	init_idstring_pointers();
 }

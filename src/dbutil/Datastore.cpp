@@ -48,7 +48,7 @@ BLTFileDataStore::~BLTFileDataStore()
 
 size_t BLTFileDataStore::read(size_t position_in_file, uint8_t * data, size_t length)
 {
-	lseek(fd, position_in_file, SEEK_SET);
+	lseek64(fd, position_in_file, SEEK_SET);
 	size_t count = ::read(fd, data, length);
 	assert(count == length);
 

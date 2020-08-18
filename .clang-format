@@ -1,0 +1,27 @@
+BasedOnStyle: Microsoft
+
+# Ported from the astylerc file, repeated here for convenience:
+#  style=allman
+#  indent=tab
+#  lineend=linux
+#  indent-col1-comments
+#  pad-comma
+#  indent-namespaces
+
+BreakBeforeBraces: Allman
+UseTab: AlignWithSpaces
+UseCRLF: false
+# Nothing similar to indent-col1-comments?
+NamespaceIndentation: All
+
+# Implicit in the Allman style
+# Unfortunately with pointer alignment, astylerc aligned the pointer to the left for return types but
+# aligned them to the right for variables. This is IMO a nicer style than what we're using here, since I
+# prefer having the pointer on the left but it makes function declarations quite ugly.
+PointerAlignment: Left
+AlignTrailingComments: false
+
+# Other settings not in clang-format:
+IndentWidth: 4
+ContinuationIndentWidth: 4
+DeriveLineEnding: false

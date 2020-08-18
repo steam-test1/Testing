@@ -33,4 +33,5 @@ public:
 
 private:
 	int fd = -1;
+	size_t file_size = 0;
 };

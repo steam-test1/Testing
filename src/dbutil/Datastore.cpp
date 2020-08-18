@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <io.h>
+#define lseek64 _lseeki64
 #else
 #include <unistd.h>
 #endif
@@ -34,6 +35,10 @@ BLTFileDataStore::BLTFileDataStore(std::string filePath)
 {
 	fd = open(filePath.c_str(), O_RDONLY);
 	assert(fd != -1); // Make sure the file opened correctly
+
+	off64_t res = lseek64(fd, 0, SEEK_END);
+	assert(res != -1);
+	file_size = res;
 }
 
 BLTFileDataStore::~BLTFileDataStore()
@@ -57,7 +62,7 @@ bool BLTFileDataStore::close()
 
 size_t BLTFileDataStore::size() const
 {
-	abort();
+	return file_size;
 }
 
 bool BLTFileDataStore::is_asynchronous() const

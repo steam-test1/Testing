@@ -20,6 +20,7 @@ NamespaceIndentation: All
 # prefer having the pointer on the left but it makes function declarations quite ugly.
 PointerAlignment: Left
 AlignTrailingComments: false
+AlignEscapedNewlines: Left
 
 # Other settings not in clang-format:
 IndentWidth: 4

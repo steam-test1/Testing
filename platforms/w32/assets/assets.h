@@ -4,8 +4,9 @@
 
 #pragma once
 
-namespace blt::win32 {
+namespace blt::win32
+{
 
-    void InitAssets();
+	void InitAssets();
 
 };

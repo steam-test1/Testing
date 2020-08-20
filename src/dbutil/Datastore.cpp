@@ -1,4 +1,5 @@
 #include "Datastore.h"
+#include "util/util.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -16,16 +17,19 @@
 size_t BLTAbstractDataStore::write(size_t position_in_file, uint8_t const* data, size_t length)
 {
 	// Writing is unsupported
+	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::write called - writing is not supported!");
 	abort();
 }
 
 void BLTAbstractDataStore::set_asynchronous_completion_callback(void* /*dsl::LuaRef*/)
 {
+	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::set_asynchronous_completion_callback called - async unimplemented!");
 	abort();
 }
 
 uint64_t BLTAbstractDataStore::state()
 {
+	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::state called - unimplemented!");
 	abort();
 }
 
@@ -62,6 +66,7 @@ size_t BLTFileDataStore::read(size_t position_in_file, uint8_t* data, size_t len
 
 bool BLTFileDataStore::close()
 {
+	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::close called - unimplemented!");
 	abort();
 }
 
@@ -77,5 +82,6 @@ bool BLTFileDataStore::is_asynchronous() const
 
 bool BLTFileDataStore::good() const
 {
+	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::good called - unimplemented!");
 	abort();
 }

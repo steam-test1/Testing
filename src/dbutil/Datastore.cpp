@@ -14,7 +14,7 @@
 
 // BLTAbstractDataStore
 
-size_t BLTAbstractDataStore::write(size_t position_in_file, uint8_t const* data, size_t length)
+size_t BLTAbstractDataStore::write(uint64_t position_in_file, uint8_t const* data, size_t length)
 {
 	// Writing is unsupported
 	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::write called - writing is not supported!");
@@ -55,7 +55,7 @@ BLTFileDataStore::~BLTFileDataStore()
 	::close(fd);
 }
 
-size_t BLTFileDataStore::read(size_t position_in_file, uint8_t* data, size_t length)
+size_t BLTFileDataStore::read(uint64_t position_in_file, uint8_t* data, size_t length)
 {
 	lseek64(fd, position_in_file, SEEK_SET);
 	size_t count = ::read(fd, data, length);

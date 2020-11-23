@@ -2,12 +2,13 @@
 #include <vector>
 
 #include "global.h"
-#include "xmltweaker_internal.h"
+#include "plugins/plugins.h"
 #include "util/util.h"
 #include "wrenxml.h"
-#include "plugins/plugins.h"
+#include "xmltweaker_internal.h"
 
-extern "C" {
+extern "C"
+{
 #include "wren.h"
 }
 
@@ -15,21 +16,22 @@ using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
 
-static WrenVM *vm = NULL;
+static WrenVM* vm = NULL;
 
 static void err(WrenVM* vm, WrenErrorType type, const char* module, int line, const char* message)
 {
-	if (module == NULL) module = "<unknown>";
+	if (module == NULL)
+		module = "<unknown>";
 	PD2HOOK_LOG_LOG(string("[WREN ERR] ") + string(module) + ":" + to_string(line) + " ] " + message);
 }
 
 static void log(WrenVM* vm)
 {
-	const char *text = wrenGetSlotString(vm, 1);
+	const char* text = wrenGetSlotString(vm, 1);
 	PD2HOOK_LOG_LOG(string("[WREN] ") + text);
 }
 
-static string file_to_string(ifstream &in)
+static string file_to_string(ifstream& in)
 {
 	return string((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
 }
@@ -42,9 +44,10 @@ void io_listDirectory(WrenVM* vm)
 
 	wrenSetSlotNewList(vm, 0);
 
-	for (string const &file : files)
+	for (string const& file : files)
 	{
-		if (file == "." || file == "..") continue;
+		if (file == "." || file == "..")
+			continue;
 
 		wrenSetSlotString(vm, 1, file.c_str());
 		wrenInsertInList(vm, 0, -1, 1);
@@ -71,7 +74,7 @@ void io_info(WrenVM* vm)
 	}
 }
 
-void io_read(WrenVM *vm)
+void io_read(WrenVM* vm)
 {
 	string file = wrenGetSlotString(vm, 1);
 
@@ -86,7 +89,7 @@ void io_read(WrenVM *vm)
 	wrenSetSlotString(vm, 0, contents.c_str());
 }
 
-void io_dynamic_import(WrenVM *vm)
+void io_dynamic_import(WrenVM* vm)
 {
 	// TODO do this properly
 	string module = wrenGetSlotString(vm, 1);
@@ -96,7 +99,7 @@ void io_dynamic_import(WrenVM *vm)
 	printf("Module Load: %d\n", compileResult);
 }
 
-void io_idstring_hash(WrenVM *vm)
+void io_idstring_hash(WrenVM* vm)
 {
 	blt::idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
 
@@ -107,7 +110,7 @@ void io_idstring_hash(WrenVM *vm)
 
 static void io_load_plugin(WrenVM* vm)
 {
-	const char *plugin_filename = wrenGetSlotString(vm, 1);
+	const char* plugin_filename = wrenGetSlotString(vm, 1);
 	try
 	{
 		blt::plugins::LoadPlugin(plugin_filename);
@@ -120,23 +123,19 @@ static void io_load_plugin(WrenVM* vm)
 	}
 }
 
-static WrenForeignClassMethods bindForeignClass(
-    WrenVM* vm, const char* module, const char* class_name)
+static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)
 {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
 
 	return methods;
 }
 
-static WrenForeignMethodFn bindForeignMethod(
-    WrenVM* vm,
-    const char* module,
-    const char* className,
-    bool isStatic,
-    const char* signature)
+static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic,
+                                             const char* signature)
 {
 	WrenForeignMethodFn wxml_method = wrenxml::bind_wxml_method(vm, module, className, isStatic, signature);
-	if (wxml_method) return wxml_method;
+	if (wxml_method)
+		return wxml_method;
 
 	if (strcmp(module, "base/native") == 0)
 	{
@@ -213,10 +212,12 @@ const char* tweaker::transform_file(const char* text)
 		{
 			// If the main file doesn't exist, do nothing
 			Util::FileType ftyp = Util::GetFileType("mods/base/wren/base.wren");
-			if (ftyp == Util::FileType_None) available = false;
+			if (ftyp == Util::FileType_None)
+				available = false;
 		}
 
-		if (!available) return text;
+		if (!available)
+			return text;
 
 		WrenConfiguration config;
 		wrenInitConfiguration(&config);
@@ -250,11 +251,11 @@ const char* tweaker::transform_file(const char* text)
 
 	// TODO give a reasonable amount of information on what happened.
 	WrenInterpretResult result2 = wrenCall(vm, sig);
-	if(result2 == WREN_RESULT_COMPILE_ERROR)
+	if (result2 == WREN_RESULT_COMPILE_ERROR)
 	{
 		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
 	}
-	else if(result2 == WREN_RESULT_RUNTIME_ERROR)
+	else if (result2 == WREN_RESULT_RUNTIME_ERROR)
 	{
 		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
 	}

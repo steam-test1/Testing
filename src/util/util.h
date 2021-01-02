@@ -175,8 +175,8 @@ namespace pd2hook
 
 #define PD2HOOK_LOG_LEVEL(msg, level, file, line, ...) do { \
 	unsigned int color = 0; \
-	for (auto i : {__VA_ARGS__}) { \
-		color |= i; \
+	for (auto colour_i : {__VA_ARGS__}) { \
+		color |= colour_i; \
 	} \
 	auto& logger = pd2hook::Logging::Logger::Instance(); \
 	if(level >= logger.getLoggingLevel()) { \

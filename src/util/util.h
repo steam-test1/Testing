@@ -188,7 +188,7 @@ namespace pd2hook
 		pd2hook::Logging::LogWriter writer(file, line, level); \
 		writer << msg; \
 		writer.write(logger); \
-	}} while (false);
+	}} while (false)
 
 #elif __GNUC__
 
@@ -199,7 +199,7 @@ namespace pd2hook
 		pd2hook::Logging::LogWriter writer(file, line, level); \
 		writer << msg; \
 		writer.write(logger); \
-	}} while (false);
+	}} while (false)
 
 #endif
 

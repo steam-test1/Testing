@@ -12,7 +12,7 @@ using namespace wrenxml;
 const char *MODULE = "base/native";
 
 #define WXML_ERR(err) { \
-	PD2HOOK_LOG_ERROR(err) \
+	PD2HOOK_LOG_ERROR(err); \
 	string str = err; \
 	wrenSetSlotString(vm, 0, str.c_str()); \
 	wrenAbortFiber(vm, 0); \

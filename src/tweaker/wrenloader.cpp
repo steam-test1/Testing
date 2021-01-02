@@ -7,10 +7,7 @@
 #include "wrenxml.h"
 #include "xmltweaker_internal.h"
 
-extern "C"
-{
-#include "wren.h"
-}
+#include <wren.hpp>
 
 using namespace pd2hook;
 using namespace pd2hook::tweaker;
@@ -95,7 +92,7 @@ void io_dynamic_import(WrenVM* vm)
 	string module = wrenGetSlotString(vm, 1);
 
 	string line = string("import \"") + module + string("\"");
-	WrenInterpretResult compileResult = wrenInterpret(vm, line.c_str());
+	WrenInterpretResult compileResult = wrenInterpret(vm, "__root", line.c_str());
 	printf("Module Load: %d\n", compileResult);
 }
 
@@ -227,7 +224,7 @@ const char* tweaker::transform_file(const char* text)
 		config.loadModuleFn = &getModulePath;
 		vm = wrenNewVM(&config);
 
-		WrenInterpretResult compileResult = wrenInterpret(vm, R"!( import "base/base" )!");
+		WrenInterpretResult compileResult = wrenInterpret(vm, "__root", R"!( import "base/base" )!");
 		printf("Compile: %d\n", compileResult);
 	}
 

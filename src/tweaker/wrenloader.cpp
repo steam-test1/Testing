@@ -229,8 +229,18 @@ const char* tweaker::transform_file(const char* text)
 		config.loadModuleFn = &getModulePath;
 		vm = wrenNewVM(&config);
 
-		WrenInterpretResult compileResult = wrenInterpret(vm, "__root", R"!( import "base/base" )!");
-		printf("Compile: %d\n", compileResult);
+		WrenInterpretResult result = wrenInterpret(vm, "__root", R"!( import "base/base" )!");
+		if (result == WREN_RESULT_COMPILE_ERROR || result == WREN_RESULT_RUNTIME_ERROR)
+		{
+			PD2HOOK_LOG_ERROR("Wren init failed: compile or runtime error!");
+
+#ifdef _WIN32
+			MessageBox(nullptr, "Failed to initialise the Wren system - see the log for details", "Wren Error", MB_OK);
+			ExitProcess(1);
+#else
+			abort();
+#endif
+		}
 	}
 
 	wrenEnsureSlots(vm, 4);

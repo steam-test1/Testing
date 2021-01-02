@@ -35,19 +35,29 @@ uint64_t BLTAbstractDataStore::state()
 
 // BLTFileDataStore
 
-BLTFileDataStore::BLTFileDataStore(std::string filePath)
+BLTFileDataStore* BLTFileDataStore::Open(std::string filePath)
 {
 	int flags = O_RDONLY;
 #ifdef _WIN32
 	// Windows Wart - suppress text file conversion
 	flags |= O_BINARY;
 #endif
-	fd = open(filePath.c_str(), flags);
-	assert(fd != -1); // Make sure the file opened correctly
+	int fd = open(filePath.c_str(), flags);
+
+	// Make sure the file opened correctly
+	if (fd == -1)
+	{
+		return nullptr;
+	}
+
+	auto obj = new BLTFileDataStore();
+	obj->fd = fd;
 
 	int64_t res = lseek64(fd, 0, SEEK_END);
 	assert(res != -1);
-	file_size = res;
+	obj->file_size = (size_t)res;
+
+	return obj;
 }
 
 BLTFileDataStore::~BLTFileDataStore()

@@ -258,6 +258,6 @@ BLTAbstractDataStore* DieselDB::Open(DieselBundle *bundle)
 	// pretty much what the Linux version of PD2 seems to do internally. The
 	// problem here is that the data store is reference counted by dsl::Archive, so
 	// caching it will be somewhat difficult.
-	BLTFileDataStore *fds = new BLTFileDataStore(bundle->path);
+	BLTFileDataStore *fds = BLTFileDataStore::Open(bundle->path);
 	return fds;
 }

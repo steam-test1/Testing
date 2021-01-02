@@ -25,7 +25,11 @@ class BLTAbstractDataStore
 class BLTFileDataStore : public BLTAbstractDataStore
 {
   public:
-	BLTFileDataStore(std::string filePath);
+	// Delete default crap
+	BLTFileDataStore(const BLTFileDataStore&) = delete;
+	BLTFileDataStore& operator=(const BLTFileDataStore&) = delete;
+
+	static BLTFileDataStore* Open(std::string filePath);
 	virtual ~BLTFileDataStore();
 	virtual size_t read(uint64_t position_in_file, uint8_t* data, size_t length) override;
 	virtual bool close() override;
@@ -34,6 +38,7 @@ class BLTFileDataStore : public BLTAbstractDataStore
 	virtual bool good() const override;
 
   private:
+	BLTFileDataStore() = default; // Used by Open, which can return null to indicate it didn't open properly
 	int fd = -1;
 	size_t file_size = 0;
 };

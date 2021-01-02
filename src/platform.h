@@ -24,6 +24,11 @@ namespace blt
 		{
 			return (name != other.name) ? name < other.name : ext < other.ext;
 		}
+
+		[[nodiscard]] inline bool is_empty() const
+		{
+			return name == idstring_none && ext == idstring_none;
+		}
 	};
 
 	namespace platform

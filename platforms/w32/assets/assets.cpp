@@ -8,6 +8,35 @@
 
 #include <stdio.h>
 
+#include <string>
+#include <tweaker/db_manager.h>
+#include <utility>
+
+// A wrapper class to store strings in the format that PAYDAY 2 does
+// Since Microsoft might (and it seems they have) change their string class, we
+// need this.
+class PDString
+{
+  public:
+	explicit PDString(std::string str) : s(std::move(str))
+	{
+		data = s.c_str();
+		len = s.length();
+		cap = s.length();
+	}
+
+  private:
+	// The data layout that mirrors PD2's string, must be 24 bytes
+	const char* data;
+	uint8_t padding[12]{};
+	int len;
+	int cap;
+
+	// String that can deal with the actual data ownership
+	std::string s;
+};
+static_assert(sizeof(PDString) == 24 + sizeof(std::string), "PDString is the wrong size!");
+
 // The signature is the same for all try_open methods, so one typedef will work for all of them.
 typedef void(__thiscall* try_open_t)(void* this_, void* archive, int a, int b, blt::idstring type, blt::idstring name);
 

@@ -13,11 +13,12 @@ using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
 
-static WrenVM* vm = NULL;
+static WrenVM* vm = nullptr;
 
-static void err(WrenVM* vm, WrenErrorType type, const char* module, int line, const char* message)
+static void err([[maybe_unused]] WrenVM* vm, [[maybe_unused]] WrenErrorType type, const char* module, int line,
+                const char* message)
 {
-	if (module == NULL)
+	if (module == nullptr)
 		module = "<unknown>";
 	PD2HOOK_LOG_LOG(string("[WREN ERR] ") + string(module) + ":" + to_string(line) + " ] " + message);
 }
@@ -112,7 +113,7 @@ static void io_load_plugin(WrenVM* vm)
 	{
 		blt::plugins::LoadPlugin(plugin_filename);
 	}
-	catch (string err)
+	catch (const string& err)
 	{
 		string msg = string("LoadPlugin: ") + string(plugin_filename) + string(" : ") + err;
 		wrenSetSlotString(vm, 0, msg.c_str());
@@ -175,10 +176,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	}
 	// Other modules...
 
-	return NULL;
+	return nullptr;
 }
 
-static char* getModulePath(WrenVM* vm, const char* name_c)
+static char* getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 {
 	string name = name_c;
 	string mod = name.substr(0, name.find_first_of('/'));
@@ -187,7 +188,7 @@ static char* getModulePath(WrenVM* vm, const char* name_c)
 	ifstream handle("mods/" + mod + "/wren/" + file + ".wren");
 	if (!handle.good())
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	string str = file_to_string(handle);
@@ -203,7 +204,7 @@ static bool available = true;
 
 const char* tweaker::transform_file(const char* text)
 {
-	if (vm == NULL)
+	if (vm == nullptr)
 	{
 		if (available)
 		{

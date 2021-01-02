@@ -107,6 +107,17 @@ void pd2hook::tweaker::ignore_file(idfile file)
 	ignored_files.insert(file);
 }
 
+/*
+--------------------------------------------------------------------
+lookup8.c, by Bob Jenkins, January 4 1997, Public Domain.
+hash(), hash2(), hash3, and mix() are externally useful functions.
+Routines to test the hash are included if SELF_TEST is defined.
+You can use this free for any purpose.  It has no warranty.
+
+2009: This is obsolete.  I recently timed lookup3.c as being faster
+at producing 64-bit results.
+--------------------------------------------------------------------
+*/
 typedef  unsigned long  long ub8;   /* unsigned 8-byte quantities */
 typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
 typedef  unsigned       char ub1;

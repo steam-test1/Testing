@@ -256,10 +256,12 @@ const char* tweaker::transform_file(const char* text)
 	if (result2 == WREN_RESULT_COMPILE_ERROR)
 	{
 		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
+		return text;
 	}
 	else if (result2 == WREN_RESULT_RUNTIME_ERROR)
 	{
-		PD2HOOK_LOG_ERROR("Wren tweak file failed: compile error!");
+		PD2HOOK_LOG_ERROR("Wren tweak file failed: runtime error!");
+		return text;
 	}
 
 	wrenReleaseHandle(vm, tweakerClass);

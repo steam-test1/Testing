@@ -146,6 +146,12 @@ CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_property_match_resolv
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
 
+// Since the start of this function is very generic, grab a later section and seek backwards
+// Also note about stack_pad: for whatever reason it seems the function pops eight extra bytes, so
+// all the calls to it in-game I saw subtracted eight from ESP before pushing their arguments. I
+// don't know *why* it would be doing this, but here's an easy way to compensate for it:
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, Archive_ctor, void, "\x8b\x44\x24\x20\xc7\x44\x24\x10\x00\x00\x00\x00\x89\x46\x18\x8b\x44\x24\x24\x89\x46\x1c\x8b\x44\x24\x28", "xxxxxxxxxxxxxxxxxxxxxxxxxx", -59, void* name_stdstr, void* datastore, int64_t pos, int64_t size, bool ukn_prob_compression, uint64_t stack_pad);
+
 // Some internal LuaJIT bits and pieces we can use to implement LuaJIT methods inlined by the compiler
 CREATE_LUAJIT_CALLABLE_SIGNATURE(lj_cf_rawset, int, "\x56\x8B\x74\x24\x08\x8B\x46\x10\x8B\x4E\x14\x3B\xC1\x0F\x83\x85\x00\x00\x00\x83\x78\x04\xF4\x75\x7F\x8D\x50\x08\x3B\xD1\x73\x5E", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
 CREATE_LUAJIT_CALLABLE_SIGNATURE(index2adr, void*, "\x8B\x4C\x24\x08\x85\xC9\x7E\x1F\x8B\x54\x24\x04\x8B\x42\x10\x8D\x04\xC8\x83\xC0\xF8\x3B\x42\x14\x0F\x82\x98\x00\x00\x00\x8B\x42", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*, int)

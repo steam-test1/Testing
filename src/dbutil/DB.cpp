@@ -8,8 +8,12 @@
 #include <algorithm>
 
 #include <assert.h>
-
 #include <stdio.h>
+#include <string.h>
+
+#ifndef _WIN32
+#include <time.h>
+#endif
 
 namespace fs = std::filesystem;
 using namespace blt::db;
@@ -18,6 +22,27 @@ static_assert(sizeof(void*) == sizeof(intptr_t));
 using pos_t = std::ios::pos_type;
 using FileList = std::vector<DslFile>&;
 using FileMap = std::map<std::pair<idstring, idstring>, DslFile*>&;
+
+static uint64_t monotonicTimeMicros()
+{
+#ifdef _WIN32
+	// https://docs.microsoft.com/en-us/windows/win32/sysinfo/acquiring-high-resolution-time-stamps
+	LARGE_INTEGER StartingTime;
+	LARGE_INTEGER Frequency;
+
+	QueryPerformanceFrequency(&Frequency);
+	QueryPerformanceCounter(&StartingTime);
+
+	StartingTime.QuadPart *= 1000000;
+	StartingTime.QuadPart /= Frequency.QuadPart;
+	return StartingTime.QuadPart;
+#else
+	// TODO test, this may be wrong
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+#endif
+}
 
 struct dsl_Vector
 {
@@ -68,6 +93,9 @@ static void loadBundleHeader(std::string filename, FileList);
 
 DieselDB::DieselDB()
 {
+	uint64_t start_time = monotonicTimeMicros();
+	PD2HOOK_LOG_LOG("Start loading DB info");
+
 	std::ifstream in;
 	in.exceptions(std::ios::failbit | std::ios::badbit);
 	in.open("assets/bundle_db.blb", std::ios::binary);
@@ -151,6 +179,15 @@ DieselDB::DieselDB()
 	}
 
 	loadBundleHeader("assets/all_h.bundle", filesList);
+
+	// We're done loading, print out how long it took and how many files it's tracking (to estimate memory usage)
+	uint64_t end_time = monotonicTimeMicros();
+
+	char buff[1024];
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff) - 1, "Finished loading DB info: %zd files in %d ms", filesList.size(),
+	         (int)(end_time - start_time) / 1000);
+	PD2HOOK_LOG_LOG(buff);
 }
 
 static void loadPackageHeader(DieselBundle *bundle, FileList files)

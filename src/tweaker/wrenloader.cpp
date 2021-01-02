@@ -13,7 +13,7 @@ using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
 
-static WrenVM* vm = nullptr;
+static WrenVM* globalVM = nullptr;
 
 static void err([[maybe_unused]] WrenVM* vm, [[maybe_unused]] WrenErrorType type, const char* module, int line,
                 const char* message)
@@ -204,6 +204,10 @@ static bool available = true;
 
 const char* tweaker::transform_file(const char* text)
 {
+	// We've renamed the global variable (the old name, 'vm' was a bad idea for a global)
+	// It's still more convenient to use it locally though.
+	WrenVM*& vm = globalVM;
+
 	if (vm == nullptr)
 	{
 		if (available)

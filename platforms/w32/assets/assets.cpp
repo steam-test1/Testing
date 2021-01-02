@@ -9,7 +9,6 @@
 #include <stdio.h>
 
 #include <string>
-#include <tweaker/db_manager.h>
 #include <utility>
 
 // A wrapper class to store strings in the format that PAYDAY 2 does

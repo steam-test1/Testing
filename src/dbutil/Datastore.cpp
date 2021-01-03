@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -87,6 +88,7 @@ size_t BLTFileDataStore::size() const
 
 bool BLTFileDataStore::is_asynchronous() const
 {
+	// TODO this would probably be good to implement if possible
 	return false;
 }
 
@@ -94,4 +96,47 @@ bool BLTFileDataStore::good() const
 {
 	PD2HOOK_LOG_ERROR("BLTAbstractDataStore::good called - unimplemented!");
 	abort();
+}
+
+// BLTStringDataStore
+
+BLTStringDataStore::BLTStringDataStore(std::string contents) : contents(std::move(contents))
+{
+}
+
+size_t BLTStringDataStore::read(uint64_t position_in_file, uint8_t* data, size_t length)
+{
+	// If the start of the read is past the end, stop here
+	if (position_in_file >= contents.size())
+		return 0;
+
+	// If the end of the read is past the end, shrink it down so it'll fit
+	size_t remaining = contents.size() - position_in_file;
+	if (remaining < length)
+		length = remaining;
+
+	memcpy(data, contents.c_str(), length);
+	return length;
+}
+
+bool BLTStringDataStore::close()
+{
+	PD2HOOK_LOG_ERROR("BLTStringDataStore::close called - unimplemented!");
+	abort();
+	// What are we supposed to return?
+}
+
+size_t BLTStringDataStore::size() const
+{
+	return contents.size();
+}
+
+bool BLTStringDataStore::is_asynchronous() const
+{
+	return false;
+}
+
+bool BLTStringDataStore::good() const
+{
+	return true;
 }

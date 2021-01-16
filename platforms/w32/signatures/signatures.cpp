@@ -1,24 +1,28 @@
-#include <iostream>
-#include <fstream>
-#include <map>
+// We specifically need the windows and psapi imports in this order
+// clang-format off
 #include <Windows.h>
-#include <tlhelp32.h>
 #include <Psapi.h>
+// clang-format on
+
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <tlhelp32.h>
 #include "subhook.h"
 
 #define SIG_INCLUDE_MAIN
 #include "sigdef.h"
 #undef SIG_INCLUDE_MAIN
 
-#include "util/util.h"
 #include "signatures.h"
+#include "util/util.h"
 
 using std::string;
 using std::to_string;
 
 class SignatureCacheDB
 {
-public:
+  public:
 	SignatureCacheDB(string filename) : filename(filename)
 	{
 		std::ifstream infile(filename, std::ios::binary);
@@ -28,7 +32,7 @@ public:
 			return;
 		}
 
-#define READ_BIN(var) infile.read((char*) &var, sizeof(var));
+#define READ_BIN(var) infile.read((char*)&var, sizeof(var));
 
 		uint32_t revision;
 		READ_BIN(revision); // TODO if the file is EOF, exit
@@ -99,7 +103,7 @@ public:
 			return;
 		}
 
-#define WRITE_BIN(var) outfile.write((char*) &var, sizeof(var))
+#define WRITE_BIN(var) outfile.write((char*)&var, sizeof(var))
 
 		uint32_t revision = CACHEDB_REVISION;
 		WRITE_BIN(revision);
@@ -109,7 +113,7 @@ public:
 
 		PD2HOOK_LOG_LOG(string("Saving ") + to_string(count) + string(" signatures"));
 
-		for (auto const &sig : locations)
+		for (auto const& sig : locations)
 		{
 			// name length
 			uint32_t length = sig.first.length();
@@ -127,7 +131,8 @@ public:
 
 #undef READ_BIN
 	}
-private:
+
+  private:
 	const string filename;
 	std::map<string, DWORD> locations;
 
@@ -137,7 +142,7 @@ private:
 
 MODULEINFO GetModuleInfo(string szModule)
 {
-	MODULEINFO modinfo = { 0 };
+	MODULEINFO modinfo = {0};
 	HMODULE hModule = GetModuleHandle(szModule.c_str());
 	if (hModule == 0)
 		return modinfo;
@@ -145,7 +150,8 @@ MODULEINFO GetModuleInfo(string szModule)
 	return modinfo;
 }
 
-static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i, DWORD *result)
+static bool CheckSignature(const char* pattern, DWORD patternLength, const char* mask, DWORD base, DWORD size, DWORD i,
+                           DWORD* result)
 {
 	bool found = true;
 	for (DWORD j = 0; j < patternLength; j++)
@@ -162,7 +168,8 @@ static bool CheckSignature(const char* pattern, DWORD patternLength, const char*
 	return false;
 }
 
-DWORD FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, DWORD hint, bool *hintCorrect, DWORD *hintOut)
+DWORD FindPattern(char* module, const char* funcname, const char* pattern, const char* mask, DWORD hint,
+                  bool* hintCorrect, DWORD* hintOut)
 {
 	*hintOut = NULL;
 
@@ -175,7 +182,8 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 	{
 		DWORD result;
 		*hintCorrect = CheckSignature(pattern, patternLength, mask, base, size, hint, &result);
-		if (*hintCorrect) return result;
+		if (*hintCorrect)
+			return result;
 	}
 	else
 	{
@@ -196,14 +204,16 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 				bool correct = CheckSignature(pattern, patternLength, mask, base, size, ci, &addr);
 				if (correct)
 				{
-					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") + to_string(result) + string(",") + to_string(addr);
+					string err = string("Found duplicate signature for ") + string(funcname) + string(" at ") +
+								 to_string(result) + string(",") + to_string(addr);
 					PD2HOOK_LOG_WARN(err);
 					hintOut = NULL; // Don't cache sigs with errors
 				}
 			}
 #endif
 
-			if (hintOut) *hintOut = i;
+			if (hintOut)
+				*hintOut = i;
 			return result;
 		}
 	}
@@ -213,7 +223,8 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 
 std::vector<SignatureF>* allSignatures = NULL;
 
-SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask, int offset, SignatureVR vr)
+SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask,
+                                 int offset, SignatureVR vr)
 {
 	// lazy-init, container gets 'emptied' when initialized on compile.
 	if (!allSignatures)
@@ -221,7 +232,7 @@ SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char*
 		allSignatures = new std::vector<SignatureF>();
 	}
 
-	SignatureF ins = { funcname, signature, mask, offset, adress, vr };
+	SignatureF ins = {funcname, signature, mask, offset, adress, vr};
 	allSignatures->push_back(ins);
 }
 
@@ -232,11 +243,11 @@ void SignatureSearch::Search()
 	GetModuleFileName(NULL, processPath, MAX_PATH + 1); // Get the path
 	TCHAR filename[MAX_PATH + 1];
 	_splitpath_s( // Find the filename part of the path
-	    processPath, // Input
-	    NULL, 0, // Don't care about the drive letter
-	    NULL, 0, // Don't care about the directory
-	    filename, MAX_PATH, // Grab the filename
-	    NULL, 0 // Extension is always .exe
+		processPath, // Input
+		NULL, 0, // Don't care about the drive letter
+		NULL, 0, // Don't care about the directory
+		filename, MAX_PATH, // Grab the filename
+		NULL, 0 // Extension is always .exe
 	);
 
 	string basename = filename;
@@ -261,7 +272,8 @@ void SignatureSearch::Search()
 		// If the function is desktop-only and we're in VR (or vise-versa), skip it
 		// This *significantly* improves loading times - on my system it cut loading times
 		//  by ~2.5 seconds.
-		if (it->vr == (is_in_vr ? SignatureVR_Desktop : SignatureVR_VR)) {
+		if (it->vr == (is_in_vr ? SignatureVR_Desktop : SignatureVR_VR))
+		{
 			*(void**)it->address = NULL;
 			continue;
 		}
@@ -271,7 +283,8 @@ void SignatureSearch::Search()
 
 		bool hintCorrect;
 		DWORD hintOut = NULL;
-		DWORD addr = (FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
+		DWORD addr =
+			(FindPattern(filename, it->funcname, it->signature, it->mask, hint, &hintCorrect, &hintOut) + it->offset);
 		*((void**)it->address) = (void*)addr;
 
 		if (addr == NULL)
@@ -284,7 +297,8 @@ void SignatureSearch::Search()
 		}
 		else if (!hintCorrect)
 		{
-			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " + to_string(hintOut) + ")!");
+			PD2HOOK_LOG_WARN(string("Sigcache for function ") + funcname + " incorrect (" + to_string(hint) + " vs " +
+			                 to_string(hintOut) + ")!");
 		}
 
 		if (!hintCorrect && hintOut != NULL)
@@ -296,9 +310,9 @@ void SignatureSearch::Search()
 
 	unsigned long ms_end = GetTickCount();
 
-	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ")
-	                + to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses)
-	                + string(" cache misses"));
+	PD2HOOK_LOG_LOG(string("Scanned for ") + to_string(allSignatures->size()) + string(" signatures in ") +
+	                to_string((int)(ms_end - ms_start)) + string(" milliseconds with ") + to_string(cacheMisses) +
+	                string(" cache misses"));
 
 	if (cacheMisses > 0)
 	{
@@ -309,7 +323,8 @@ void SignatureSearch::Search()
 
 void* SignatureSearch::GetFunctionByName(const char* name)
 {
-	if (!allSignatures) return NULL;
+	if (!allSignatures)
+		return NULL;
 
 	for (const auto& sig : *allSignatures)
 	{

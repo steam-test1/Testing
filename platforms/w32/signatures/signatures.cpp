@@ -11,11 +11,14 @@
 #include "subhook.h"
 
 #define SIG_INCLUDE_MAIN
+#define INCLUDE_TRY_OPEN_FUNCTIONS
 #include "sigdef.h"
 #undef SIG_INCLUDE_MAIN
 
 #include "signatures.h"
 #include "util/util.h"
+
+std::vector<void*> try_open_functions;
 
 using std::string;
 using std::to_string;
@@ -221,6 +224,89 @@ DWORD FindPattern(char* module, const char* funcname, const char* pattern, const
 	return NULL;
 }
 
+static void FindAssetLoadSignatures(const char* module, SignatureCacheDB& cache, int* cache_misses)
+{
+	*cache_misses = 0;
+
+	// Kinda hacky: look for the three different resolver functions
+	// (there is a fourth one - the property match resolver - but it's unique enough we can identify it
+	//  with a normal signature)
+	// These are all identical bar calling a different function one time, which we have to mask off
+	// to avoid breaking when an update comes out. Since we treat them all the same anyway - we hook them
+	// and run the same custom asset loading code - we don't really care which one is which, we just need
+	// all of them.
+	const char* pattern =
+		"\x6A\xFF\x68????\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00"
+		"\x00\x81\xEC\x50\x01\x00\x00\xC7\x04\x24\x00\x00"
+		"??????????????????????????????????????????????????????????????" // Padding required to avoid another function
+		"\xc7\x84\x24";
+	const char* mask = "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx"
+					   "??????????????????????????????????????????????????????????????"
+					   "xxx";
+
+	// There should be three copies of this function
+	int target_count = 3;
+
+	MODULEINFO mInfo = GetModuleInfo(module);
+	DWORD base = (DWORD)mInfo.lpBaseOfDll;
+	DWORD size = (DWORD)mInfo.SizeOfImage;
+	DWORD patternLength = (DWORD)strlen(mask);
+
+	std::vector<void*>& results = try_open_functions;
+
+	// Implement caching - if all the signatures are at the same place, assume it's still working
+	int cache_count = cache.GetAddress("asset_load_signatures_count");
+	if (cache_count == target_count)
+	{
+		for (int i = 0; i < cache_count; i++)
+		{
+			DWORD target = cache.GetAddress("asset_load_signatures_id_" + to_string(i));
+
+			// Make sure this signature is in-bounds
+			if (target >= size - patternLength)
+				goto cache_fail;
+
+			DWORD result;
+			bool correct = CheckSignature(pattern, patternLength, mask, base, size, target, &result);
+			if (!correct)
+				goto cache_fail;
+			results.push_back((void*)result);
+		}
+		return;
+
+	cache_fail:
+		results.clear();
+	}
+
+	// Make sure the cache gets updated afterwards
+	(*cache_misses)++;
+
+	for (DWORD i = 0; i < size - patternLength; i++)
+	{
+		DWORD result;
+		bool correct = CheckSignature(pattern, patternLength, mask, base, size, i, &result);
+
+		if (!correct)
+			continue;
+
+		cache.UpdateAddress("asset_load_signatures_id_" + to_string(results.size()), i);
+		results.push_back((void*)result);
+		PD2HOOK_LOG_LOG(string("Found signature #") + to_string(results.size()) + string(" for asset loading at ") +
+		                to_string((DWORD)result));
+	}
+
+	cache.UpdateAddress("asset_load_signatures_count", results.size());
+
+	if (target_count < results.size())
+	{
+		PD2HOOK_LOG_WARN(string("Failed to locate enough instances of the asset loading function:"));
+	}
+	else if (target_count > results.size())
+	{
+		PD2HOOK_LOG_WARN(string("Located too many instances of the asset loading function:"));
+	}
+}
+
 std::vector<SignatureF>* allSignatures = NULL;
 
 SignatureSearch::SignatureSearch(const char* funcname, void* adress, const char* signature, const char* mask,
@@ -307,6 +393,10 @@ void SignatureSearch::Search()
 			cacheMisses++;
 		}
 	}
+
+	int asset_cache_misses = 0;
+	FindAssetLoadSignatures(filename, cache, &asset_cache_misses);
+	cacheMisses += asset_cache_misses;
 
 	unsigned long ms_end = GetTickCount();
 

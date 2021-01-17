@@ -30,12 +30,12 @@ static void init_idstring_pointers()
 {
 	char *tmp;
 
-	tmp = (char*)try_open_funcptr;
-	tmp += 0x44;
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x46;
 	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
-	tmp = (char*)try_open_funcptr;
-	tmp += 0x2A;
+	tmp = (char*)try_open_property_match_resolver;
+	tmp += 0x2B;
 	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 }
 

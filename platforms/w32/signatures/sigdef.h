@@ -133,15 +133,14 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x56\x8B\x74\x24\x08\x57\x56\x
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
 
 // The four different try_open functions, each one with a different resolver to filter files
-// Unfortunately, the language and english resolvers are very similar and we'd need a super long string to get them. Ignore them for now.
-// It looks like the language resolver is only used for some sounds (those with dialogue) and strings, and the
-// english resolver is only used for what appears to be a debug mode on the sound system.
-// Finally, note we don't declare types for these - it's only used in one place, no need to include more headers
-// into this file (which will then be used when compiling everything).
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_funcptr, int, "\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xEC\x50\x01\x00\x00\xC7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
-// CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_lang_resolver, int, "\x6a\xff\x68????\x64\xa1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xec\x50\x01\x00\x00\xc7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
+// Unfortunately, the language, english, and funcptr resolvers are identical bar for a different function call
+// address, so we can't hook them normally. They have special handling by means of the FindAssetLoadSignatures
+// function. Their addresses then get filled out here:
+// (note: ifdef'd off so we don't have to include vector everywhere)
+#ifdef INCLUDE_TRY_OPEN_FUNCTIONS
+extern std::vector<void*> try_open_functions;
+#endif
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_property_match_resolver, int, "\x6a\xff\x68????\x64\xa1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xec\x54\x01\x00\x00\xc7\x44\x24\x04\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
-// CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_prob_english_resolver, int, "\x6a\xff\x68????\x64\xa1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xec\x50\x01\x00\x00\xc7\x04\x24\x00\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
 
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
 CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)

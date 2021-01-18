@@ -211,8 +211,9 @@ namespace pd2hook
 		const char* archivePath = lua_tolstring(L, 1, &len);
 		const char* extractPath = lua_tolstring(L, 2, &len);
 
-		pd2hook::ExtractZIPArchive(archivePath, extractPath);
-		return 0;
+		bool retVal = pd2hook::ExtractZIPArchive(archivePath, extractPath);
+		lua_pushboolean(L, retVal);
+		return 1;
 	}
 
 	int luaF_removeDirectory(lua_State* L)

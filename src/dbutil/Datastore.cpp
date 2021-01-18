@@ -72,7 +72,7 @@ size_t BLTFileDataStore::read(uint64_t position_in_file, uint8_t* data, size_t l
 	size_t count = ::read(fd, data, length);
 	assert(count == length);
 
-	return length;
+	return count;
 }
 
 bool BLTFileDataStore::close()

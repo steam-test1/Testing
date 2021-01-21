@@ -76,6 +76,9 @@ It also has libraries that are very small projects, rarely available in package 
 that come included as git submodules. These are automatically added as targets by CMake,
 so you don't need to make any special efforts to use them.
 
+To compile the loader, you'll also need to have GCC-9 installed, which older distributions do not have.
+[Follow these instructions](https://askubuntu.com/a/1149383) and [these instructions](https://linuxconfig.org/how-to-switch-between-multiple-gcc-and-g-compiler-versions-on-ubuntu-20-04-lts-focal-fossa) to set GCC-9 to manual.
+
 ### GNU+Linux
 
 First, clone this repository:
@@ -110,8 +113,8 @@ These packages are normally as follows: `libcurl4-openssl-dev`, `libssl-dev`,
 `zlib1g-dev`, and `libopenal-dev`. This is distribution-dependant, naturally.
 
 Next, compile the loader. You can speed up the compile process by replacing the number
-"4" with the amount of threads your CPU has (generally it's twice the core count, so
-for example: 2 cores will have 4 threads, 4 cores will have 8 threads, and so on):
+"4" with the amount of threads your CPU has (On AMD CPU's, it's twice the core count, so
+for example: 2 cores will have 4 threads, 4 cores will have 8 threads, and so on, while on Intel, it varies):
 
 ```
 make -j 4
@@ -129,8 +132,35 @@ env LD_PRELOAD="$LD_PRELOAD ./libsuperblt_loader.so" %command%
 This environment variable will tell the game to look for the SuperBLT loader when you run PAYDAY 2.
 
 A known issue is that, depending on how new your distributions' packages are, Steam has an annoying tendancy to use an outdated version of
-libcurl4 that it packages in with the client, which the loader cannot use. Some distributions may require manually looking for the latest version of this library.
-More detailed instructions on how to do this [can be found here](https://steamcommunity.com/sharedfiles/filedetails/?id=801187233)
+libcurl4 that it packages in with the client, which the loader cannot use. Newer distributions will require manually looking for the latest version of this library:
+
+First, open a terminal, and cd to where steam installs libcurl4:
+
+```
+cd /home/$USER/.steam/ubuntu12_32/steam-runtime/pinned_libs_64
+```
+
+Then run this command to make a backup of the .so file:
+
+```
+mv libcurl.so.4 libcurl.so.4.bak
+```
+
+Then run this command, which will move the updated libcurl4 from the system to steams' pinned libs directory
+(Note, some distributions do not have libcurl4 stored here, so look around for it before running the command):
+
+```
+ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4 libcurl.so.4
+```
+
+And finally, Exit gracefully:
+
+```
+exit
+```
+
+That should hopefully fix the loader not letting PAYDAY 2 launch until Steam inevtiably updates their client, so you'll have to run these commands again whent hat happens.
+If this sounds like too much hard work, then the precompiled loader linked above includes a bash script that runs these commands in quick succession.
 
 Be sure to install the basemod from [GitLab:znixian/payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua),
 as the automatic installer isn't currently implemented on GNU+Linux.

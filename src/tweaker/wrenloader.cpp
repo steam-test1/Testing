@@ -9,6 +9,8 @@
 
 #include <wren.hpp>
 
+#include "wren_generated_src.h"
+
 using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
@@ -87,16 +89,6 @@ void io_read(WrenVM* vm)
 	wrenSetSlotString(vm, 0, contents.c_str());
 }
 
-void io_dynamic_import(WrenVM* vm)
-{
-	// TODO do this properly
-	string module = wrenGetSlotString(vm, 1);
-
-	string line = string("import \"") + module + string("\"");
-	WrenInterpretResult compileResult = wrenInterpret(vm, "__root", line.c_str());
-	printf("Module Load: %d\n", compileResult);
-}
-
 void io_idstring_hash(WrenVM* vm)
 {
 	blt::idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
@@ -159,10 +151,6 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 			{
 				return &io_read;
 			}
-			if (isStatic && strcmp(signature, "dynamic_import(_)") == 0)
-			{
-				return &io_dynamic_import;
-			}
 			if (isStatic && strcmp(signature, "idstring_hash(_)") == 0)
 			{
 				return &io_idstring_hash;
@@ -181,6 +169,19 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 
 static char* getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 {
+	// First see if this is a module that's embedded within SuperBLT
+	const char* builtin_string = nullptr;
+	lookup_builtin_wren_src(name_c, &builtin_string);
+	if (builtin_string)
+	{
+		size_t length = strlen(builtin_string) + 1;
+		char* output = (char*)malloc(length); // +1 for the null
+		portable_strncpy(output, builtin_string, length);
+
+		return output; // free()d by Wren
+	}
+
+	// Otherwise it's a normal wren file, load it from the appropriate mod
 	string name = name_c;
 	string mod = name.substr(0, name.find_first_of('/'));
 	string file = name.substr(name.find_first_of('/') + 1);

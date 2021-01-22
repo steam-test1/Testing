@@ -76,6 +76,24 @@ endif()
 target_include_directories(subhook PUBLIC lib/subhook)
 
 ###############################################################################
+## Wren source generation #####################################################
+###############################################################################
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(wren_src_files
+	wren/native.wren
+	)
+add_custom_command(
+	OUTPUT wren_generated_src.c gen/wren_generated_src.h
+	COMMAND ${Python3_EXECUTABLE} wren/generate.py ${CMAKE_CURRENT_BINARY_DIR} ${wren_src_files}
+	MAIN_DEPENDENCY wren/generate.py
+	DEPENDS ${wren_src_files}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	VERBATIM
+)
+list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/wren_generated_src.c)
+
+###############################################################################
 ## Base (non-platform-specific) part of SuperBLT ##############################
 ###############################################################################
 
@@ -111,6 +129,9 @@ endif()
 
 # Allow both SuperBLT and the loaders access to the headers
 target_include_directories(SuperBLT PUBLIC src)
+
+# Make the generated wren header available
+target_include_directories(SuperBLT PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 ###############################################################################
 ## dependencies ###############################################################

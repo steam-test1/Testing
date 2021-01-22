@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #include <string>
-#include <tweaker/db_manager.h>
+#include <tweaker/db_hooks.h>
 #include <utility>
 
 using pd2hook::tweaker::dbhook::hook_asset_load;

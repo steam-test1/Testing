@@ -100,7 +100,7 @@ cmake ..
 Alternatively, if you want debug symbols for GDB, add it as an argument:
 
 ```
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 ```
 
 If the previous step told you that you're missing some libraries (which is quite likely), install them, and be

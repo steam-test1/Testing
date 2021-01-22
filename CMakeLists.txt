@@ -82,6 +82,7 @@ target_include_directories(subhook PUBLIC lib/subhook)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(wren_src_files
 	wren/native.wren
+	wren/DB_001.wren
 	)
 add_custom_command(
 	OUTPUT wren_generated_src.c gen/wren_generated_src.h

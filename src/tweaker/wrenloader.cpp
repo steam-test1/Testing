@@ -1,6 +1,7 @@
 #include <fstream>
 #include <vector>
 
+#include "db_hooks.h"
 #include "global.h"
 #include "plugins/plugins.h"
 #include "util/util.h"
@@ -116,6 +117,10 @@ static void io_load_plugin(WrenVM* vm)
 static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)
 {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
+	if (methods.allocate || methods.finalize)
+		return methods;
+
+	methods = dbhook::bind_dbhook_class(vm, module, class_name);
 
 	return methods;
 }
@@ -126,6 +131,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	WrenForeignMethodFn wxml_method = wrenxml::bind_wxml_method(vm, module, className, isStatic, signature);
 	if (wxml_method)
 		return wxml_method;
+
+	WrenForeignMethodFn dbhook_method = dbhook::bind_dbhook_method(vm, module, className, isStatic, signature);
+	if (dbhook_method)
+		return dbhook_method;
 
 	if (strcmp(module, "base/native") == 0)
 	{

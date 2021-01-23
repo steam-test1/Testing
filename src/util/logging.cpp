@@ -83,6 +83,7 @@ namespace pd2hook
 				LoggerImpl(std::string&& file);
 
 				void setForceFlush(bool forceFlush);
+				void flush();
 
 				bool isOpen() const
 				{
@@ -106,6 +107,11 @@ namespace pd2hook
 			{
 				std::ostream& (*forceFlusher)(std::ostream&) = &std::endl;
 				mEndl = forceFlush ? forceFlusher : quick_endl;
+			}
+
+			void LoggerImpl::flush()
+			{
+				mOut << std::endl;
 			}
 
 			LoggerImpl::LoggerImpl(std::string&& file)
@@ -176,6 +182,11 @@ namespace pd2hook
 			static_cast<LoggerImpl *>(this)->setForceFlush(forceFlush);
 		}
 
+		void Logger::flush()
+		{
+			static_cast<LoggerImpl *>(this)->flush();
+		}
+
 		void Logger::log(const Message_t& msg)
 		{
 			static_cast<LoggerImpl *>(this)->log(msg);
@@ -199,6 +210,13 @@ namespace pd2hook
 			else
 			{
 				*this << LogTime << msgType;
+			}
+
+			// Always flush high-priority messages, in case the game crashes we don't want
+			// the end of the log to get lost.
+			if (msgType == LogType::LOGGING_ERROR)
+			{
+				needsFlush = true;
 			}
 		}
 	}

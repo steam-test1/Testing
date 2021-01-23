@@ -122,6 +122,7 @@ namespace pd2hook
 			}
 
 			void setForceFlush(bool forceFlush);
+			void flush();
 
 			void log(const Message_t& msg);
 			void log(const Message_t& msg, LogType msgType)
@@ -145,7 +146,13 @@ namespace pd2hook
 			void write(Logger& logger)
 			{
 				logger.log(str());
+
+				if (needsFlush)
+					logger.flush();
 			}
+
+		private:
+			bool needsFlush = false;
 		};
 
 		class FunctionLogger

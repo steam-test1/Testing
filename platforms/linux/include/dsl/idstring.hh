@@ -6,7 +6,7 @@ namespace dsl
 {
 	typedef uint64_t idstring_t;
 
-	class idstring
+	class idstring_cls
 	{
 	public:
 		idstring_t value;

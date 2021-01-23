@@ -67,8 +67,8 @@ namespace blt
 				luaL_checktype(L, 3, LUA_TUSERDATA);
 				luaL_checktype(L, 4, LUA_TSTRING);
 
-				idstring* extension = (idstring*)lua_touserdata(L, 2);
-				idstring* name = (idstring*)lua_touserdata(L, 3);
+				idstring_cls* extension = (idstring_cls*)lua_touserdata(L, 2);
+				idstring_cls* name = (idstring_cls*)lua_touserdata(L, 3);
 				hash_t hash(name->value, extension->value);
 
 				size_t len;
@@ -128,8 +128,8 @@ namespace blt
 				luaL_checktype(L, 2, LUA_TUSERDATA);
 				luaL_checktype(L, 3, LUA_TUSERDATA);
 
-				idstring* extension = (idstring*)lua_touserdata(L, 2);
-				idstring* name = (idstring*)lua_touserdata(L, 3);
+				idstring_cls* extension = (idstring_cls*)lua_touserdata(L, 2);
+				idstring_cls* name = (idstring_cls*)lua_touserdata(L, 3);
 				hash_t hash(name->value, extension->value);
 
 				custom_assets.erase(hash);
@@ -191,9 +191,9 @@ namespace blt
 	static void (*archive_ctor)(Archive* _this, libcxxstring const& name, dsl::CustomDataStore* datastore,
 	                            size_t start_pos, size_t size, bool probably_write_flag, void* ukn);
 
-	typedef void* (*try_open_t)(Archive* target, DB* db, idstring* ext, idstring* name,
+	typedef void* (*try_open_t)(Archive* target, DB* db, idstring_cls* ext, idstring_cls* name,
 	                            void* template_obj /* Misc depends on the template type */, Transport* transport);
-	typedef void* (*do_resolve_t)(DB* _this, idstring*, idstring*, void* template_obj, void* unknown);
+	typedef void* (*do_resolve_t)(DB* _this, idstring_cls*, idstring_cls*, void* template_obj, void* unknown);
 
 	// Create variables for each of the functions
 	// A detour, and a pointer to the correspoinding try_open and do_resolve functions
@@ -207,8 +207,9 @@ namespace blt
 	// A generic hook function
 	// This can be used with all four of the template values, and it passes everything through to the supplied original
 	// function if nothing has changed.
-	static void* dt_dsl_db_try_open_hook(Archive* target, DB* db, idstring* ext, idstring* name, void* misc_object,
-	                                     Transport* transport, try_open_t original, do_resolve_t resolve)
+	static void* dt_dsl_db_try_open_hook(Archive* target, DB* db, idstring_cls* ext, idstring_cls* name,
+	                                     void* misc_object, Transport* transport, try_open_t original,
+	                                     do_resolve_t resolve)
 	{
 		// TODO caching support!
 

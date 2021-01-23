@@ -5,9 +5,7 @@
 
 #include "mxml.h"
 
-extern "C" {
-#include "wren.h"
-}
+#include <wren.hpp>
 
 namespace pd2hook
 {

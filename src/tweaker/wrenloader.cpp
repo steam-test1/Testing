@@ -1,3 +1,5 @@
+#include "wrenloader.h"
+
 #include <fstream>
 #include <vector>
 
@@ -15,8 +17,6 @@
 using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
-
-static WrenVM* globalVM = nullptr;
 
 static void err([[maybe_unused]] WrenVM* vm, [[maybe_unused]] WrenErrorType type, const char* module, int line,
                 const char* message)
@@ -210,13 +210,18 @@ static char* getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 	return output; // free()d by Wren
 }
 
-static bool available = true;
-
-const char* tweaker::transform_file(const char* text)
+std::lock_guard<std::recursive_mutex> pd2hook::wren::lock_wren_vm()
 {
-	// We've renamed the global variable (the old name, 'vm' was a bad idea for a global)
-	// It's still more convenient to use it locally though.
-	WrenVM*& vm = globalVM;
+	static std::recursive_mutex vm_mutex;
+	return std::lock_guard<std::recursive_mutex>(vm_mutex);
+}
+
+WrenVM* pd2hook::wren::get_wren_vm()
+{
+	auto lock = lock_wren_vm();
+
+	static bool available = true;
+	static WrenVM* vm = nullptr;
 
 	if (vm == nullptr)
 	{
@@ -229,7 +234,7 @@ const char* tweaker::transform_file(const char* text)
 		}
 
 		if (!available)
-			return text;
+			return nullptr;
 
 		WrenConfiguration config;
 		wrenInitConfiguration(&config);
@@ -252,6 +257,14 @@ const char* tweaker::transform_file(const char* text)
 #endif
 		}
 	}
+
+	return vm;
+}
+
+const char* tweaker::transform_file(const char* text)
+{
+	auto lock = pd2hook::wren::lock_wren_vm();
+	WrenVM* vm = pd2hook::wren::get_wren_vm();
 
 	wrenEnsureSlots(vm, 4);
 

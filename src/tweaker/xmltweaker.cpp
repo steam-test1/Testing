@@ -7,9 +7,7 @@
 #include <string.h>
 #include "util/util.h"
 
-extern "C" {
-#include "wren.h"
-}
+#include <wren.hpp>
 
 using namespace std;
 using namespace pd2hook;

@@ -3,6 +3,7 @@
 //
 
 #include "db_hooks.h"
+#include "wrenloader.h"
 #include "xmltweaker_internal.h"
 
 #include <dbutil/DB.h>
@@ -41,7 +42,6 @@ class DBTargetFile
 
 	/** The handle to a Wren object to run the loading callback on */
 	WrenHandle* wren_loader_obj = nullptr;
-	WrenVM* wren_loader_vm = nullptr;
 
 	explicit DBTargetFile(blt::idfile id) : id(id)
 	{
@@ -54,7 +54,7 @@ class DBTargetFile
 
 		if (wren_loader_obj)
 		{
-			wrenReleaseHandle(wren_loader_vm, wren_loader_obj);
+			wrenReleaseHandle(pd2hook::wren::get_wren_vm(), wren_loader_obj);
 			wren_loader_obj = nullptr;
 		}
 	}
@@ -327,7 +327,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 	else if (target.wren_loader_obj)
 	{
-		WrenVM* vm = target.wren_loader_vm;
+		auto lock = pd2hook::wren::lock_wren_vm();
+		WrenVM* vm = pd2hook::wren::get_wren_vm();
 
 		// Probably not ideal to have it as a static, but hey it works fine and we only ever make one Wren context
 		static WrenHandle* callHandle = wrenMakeCallHandle(vm, "load_file(_,_)");
@@ -560,9 +561,6 @@ void DBAssetHook::getWrenLoader(WrenVM* vm)
 		return;
 	}
 
-	// Surely we must be on the same VM?
-	assert(vm == it->wren_loader_vm);
-
 	wrenSetSlotHandle(vm, 0, it->wren_loader_obj);
 }
 
@@ -571,7 +569,6 @@ void DBAssetHook::setWrenLoader(WrenVM* vm)
 	auto* it = get_this(vm);
 	it->clear_sources();
 
-	it->wren_loader_vm = vm;
 	it->wren_loader_obj = wrenGetSlotHandle(vm, 1);
 }
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <filesystem>
 #include <algorithm>
+#include <mutex>
 
 #include <assert.h>
 #include <stdio.h>
@@ -82,8 +83,13 @@ static std::vector<T> loadVector(std::istream &in, int offset)
 	return loadVector<T>(in, offset, vec);
 }
 
+static std::mutex db_setup_mutex;
+
 DieselDB* DieselDB::Instance()
 {
+	// Make sure we can't go setting it up twice in parallel
+	std::lock_guard guard(db_setup_mutex);
+
 	static DieselDB instance;
 	return &instance;
 }

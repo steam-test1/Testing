@@ -15,6 +15,7 @@
 #include "plugins/plugins.h"
 #include "scriptdata/ScriptData.h"
 #include "luautil/luautil.h"
+#include "dbutil/DB.h"
 
 #include <thread>
 #include <list>
@@ -773,6 +774,10 @@ namespace pd2hook
 #endif
 
 		blt::platform::InitPlatform();
+
+		// Start loading the DB concurrently, so (hopefully) it's done by the time we first use it
+		std::thread db_loader([]() { blt::db::DieselDB::Instance(); });
+		db_loader.detach();
 	}
 
 	void DestroyStates()

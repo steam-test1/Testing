@@ -176,18 +176,16 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	return nullptr;
 }
 
-static char* getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
+static WrenLoadModuleResult getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 {
 	// First see if this is a module that's embedded within SuperBLT
 	const char* builtin_string = nullptr;
 	lookup_builtin_wren_src(name_c, &builtin_string);
 	if (builtin_string)
 	{
-		size_t length = strlen(builtin_string) + 1;
-		char* output = (char*)malloc(length); // +1 for the null
-		portable_strncpy(output, builtin_string, length);
-
-		return output; // free()d by Wren
+		WrenLoadModuleResult result{};
+		result.source = builtin_string;
+		return result;
 	}
 
 	// Otherwise it's a normal wren file, load it from the appropriate mod
@@ -198,16 +196,34 @@ static char* getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 	ifstream handle("mods/" + mod + "/wren/" + file + ".wren");
 	if (!handle.good())
 	{
-		return nullptr;
+		WrenLoadModuleResult result{};
+		return result;
 	}
 
 	string str = file_to_string(handle);
+
+	// Perhaps unwisely I used 'continue' as a variable name in xml_loader.wren in the basemod, which
+	// is now a keyword. To avoid crashes if someone updates their DLL before updating their basemod, check
+	// for that and hack around it as necessary.
+	if (name == "base/private/xml_loader" && str.find("var continue = dive_tweak_elem") != std::string::npos)
+	{
+		// Oh by the way, thanks C++ for not having a string find-replace function (unless I can't find it)
+		size_t pos = 0;
+		while ((pos = str.find("continue", pos)) != std::string::npos)
+		{
+			str.replace(pos, 8, "cont");
+		}
+		PD2HOOK_LOG_WARN("Patching around an old use of the variable name 'continue'. Please update your basemod.");
+	}
 
 	size_t length = str.length() + 1;
 	char* output = (char*)malloc(length); // +1 for the null
 	portable_strncpy(output, str.c_str(), length);
 
-	return output; // free()d by Wren
+	WrenLoadModuleResult result{};
+	result.source = output;
+	result.onComplete = [](WrenVM*, const char* module, WrenLoadModuleResult result) { free((void*)result.source); };
+	return result;
 }
 
 std::lock_guard<std::recursive_mutex> pd2hook::wren::lock_wren_vm()

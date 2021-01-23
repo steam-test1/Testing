@@ -314,13 +314,13 @@ namespace blt
 
 	// Create hook functions for each of the original functions
 	// These just call the hook function above, passing in the correct function values
-#define HOOK_TRY_OPEN(id)                                                                                   \
-	static void* dt_dsl_db_try_open_hook_##id(Archive* target, DB* db, idstring* ext, idstring* name,       \
-	                                          void* misc_object, Transport* transport)                      \
-	{                                                                                                       \
-		hook_remove(dslDbTryOpenDetour##id);                                                                \
-		return dt_dsl_db_try_open_hook(target, db, ext, name, misc_object, transport, dsl_db_try_open_##id, \
-		                               dsl_db_do_resolve_##id);                                             \
+#define HOOK_TRY_OPEN(id)                                                                                     \
+	static void* dt_dsl_db_try_open_hook_##id(Archive* target, DB* db, idstring_cls* ext, idstring_cls* name, \
+	                                          void* misc_object, Transport* transport)                        \
+	{                                                                                                         \
+		hook_remove(dslDbTryOpenDetour##id);                                                                  \
+		return dt_dsl_db_try_open_hook(target, db, ext, name, misc_object, transport, dsl_db_try_open_##id,   \
+		                               dsl_db_do_resolve_##id);                                               \
 	}
 	EACH_HOOK(HOOK_TRY_OPEN)
 

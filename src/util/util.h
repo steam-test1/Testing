@@ -10,6 +10,7 @@
 #include <windows.h>
 #endif
 
+#include <platform.h>
 #include "lua.h"
 
 namespace pd2hook
@@ -234,6 +235,12 @@ namespace pd2hook
 			PD2HOOK_LOG_LEVEL("<<< " << mFuncName, LogType::LOGGING_FUNC, mFile, 0, FOREGROUND_RED, FOREGROUND_BLUE, FOREGROUND_GREEN);
 		}
 	}
+}
+
+// It's kinda messy to put it here, but it suits it better than in pd2hook since idstring is in blt
+namespace blt
+{
+	idstring idstring_hash(const std::string& text);
 }
 
 #endif // __UTIL_HEADER__

@@ -19,8 +19,6 @@
 #include <optional>
 #include <string>
 
-using pd2hook::tweaker::idstring_hash;
-
 using blt::db::DieselDB;
 using blt::db::DslFile;
 
@@ -213,7 +211,7 @@ static blt::idstring parseHash(std::string value)
 		return id;
 	}
 
-	return idstring_hash(value);
+	return blt::idstring_hash(value);
 }
 
 static void wrenRegisterAssetHook(WrenVM* vm)

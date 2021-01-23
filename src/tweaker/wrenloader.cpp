@@ -92,7 +92,7 @@ void io_read(WrenVM* vm)
 
 void io_idstring_hash(WrenVM* vm)
 {
-	blt::idstring hash = idstring_hash(wrenGetSlotString(vm, 1));
+	blt::idstring hash = blt::idstring_hash(wrenGetSlotString(vm, 1));
 
 	char hex[17]; // 16-chars long +1 for the null
 	snprintf(hex, sizeof(hex), "%016llx", hash);

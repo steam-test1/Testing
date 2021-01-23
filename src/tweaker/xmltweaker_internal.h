@@ -14,7 +14,5 @@ namespace pd2hook
 		 * but not necessaraly after that.
 		 */
 		const char* transform_file(const char* contents);
-
-		blt::idstring idstring_hash(std::string text);
 	}; // namespace tweaker
 }; // namespace pd2hook

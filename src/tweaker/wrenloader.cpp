@@ -114,6 +114,14 @@ static void io_load_plugin(WrenVM* vm)
 	}
 }
 
+static void io_has_native_module(WrenVM* vm)
+{
+	const char* module = wrenGetSlotString(vm, 1);
+	const char* source = nullptr;
+	lookup_builtin_wren_src(module, &source);
+	wrenSetSlotBool(vm, 0, source != nullptr);
+}
+
 static void internal_set_tweaker_enabled(WrenVM* vm)
 {
 	pd2hook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
@@ -172,6 +180,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 			if (isStatic && strcmp(signature, "load_plugin(_)") == 0)
 			{
 				return &io_load_plugin;
+			}
+			if (isStatic && strcmp(signature, "has_native_module(_)") == 0)
+			{
+				return &io_has_native_module;
 			}
 		}
 		// Other classes in main...

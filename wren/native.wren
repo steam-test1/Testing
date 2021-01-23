@@ -20,6 +20,7 @@ class IO {
 	foreign static read(path) // get file contents
 	foreign static idstring_hash(data) // hash a string
 	foreign static load_plugin(filename) // load an external plugin
+	foreign static has_native_module(name) // returns true if the given module path represents a embedded-in-DLL module
 
 	static dynamic_import(path) {
         // import a file dynamically

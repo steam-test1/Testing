@@ -15,6 +15,8 @@ using namespace tweaker;
 using blt::idstring;
 using blt::idfile;
 
+bool pd2hook::tweaker::tweaker_enabled = true;
+
 static unordered_set<char*> buffers;
 static set<idfile> ignored_files;
 
@@ -24,6 +26,11 @@ idfile last_parsed;
 
 char* tweaker::tweak_pd2_xml(char* text, int text_length)
 {
+	if (!tweaker_enabled)
+	{
+		return text;
+	}
+
 	idfile file = idfile(*blt::platform::last_loaded_name, *blt::platform::last_loaded_ext);
 
 	// Don't parse the same file more than once, as it's not actually the same file.

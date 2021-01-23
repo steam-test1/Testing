@@ -114,6 +114,11 @@ static void io_load_plugin(WrenVM* vm)
 	}
 }
 
+static void internal_set_tweaker_enabled(WrenVM* vm)
+{
+	pd2hook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
+}
+
 static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)
 {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
@@ -170,6 +175,16 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 			}
 		}
 		// Other classes in main...
+	}
+	else if (strcmp(module, "base/native/internal_001") == 0)
+	{
+		if (strcmp(className, "Internal") == 0)
+		{
+			if (isStatic && strcmp(signature, "tweaker_enabled=(_)") == 0)
+			{
+				return &internal_set_tweaker_enabled;
+			}
+		}
 	}
 	// Other modules...
 

@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 

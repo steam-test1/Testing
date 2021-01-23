@@ -214,6 +214,10 @@ namespace blt
 			log::log("Thread Lua state:", log::LOG_ERROR);
 			traceback(current_thread_lua, errlog, 0);
 
+			// Ignore the abort signal before triggering it, otherwise we'll
+			// get stuck in an infinite loop.
+			signal(SIGABRT, SIG_IGN);
+
 			abort();
 		}
 

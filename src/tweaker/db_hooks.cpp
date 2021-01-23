@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -26,6 +27,7 @@ using blt::db::DslFile;
 static const char* MODULE = "base/native/DB_001";
 
 static void wrenRegisterAssetHook(WrenVM* vm);
+static void wrenLoadAssetContents(WrenVM* vm);
 
 class DBTargetFile
 {
@@ -124,6 +126,10 @@ WrenForeignMethodFn pd2hook::tweaker::dbhook::bind_dbhook_method(WrenVM* vm, con
 		if (signature == "register_asset_hook(_,_)")
 		{
 			return wrenRegisterAssetHook;
+		}
+		else if (signature == "load_asset_contents(_,_)")
+		{
+			return wrenLoadAssetContents;
 		}
 	}
 	else if (class_name == "DBAssetHook" && !is_static)
@@ -236,6 +242,64 @@ static void wrenRegisterAssetHook(WrenVM* vm)
 	auto* hook = (DBAssetHook*)wrenSetSlotNewForeign(vm, 0, 0, sizeof(DBAssetHook));
 	hook->file = entry;
 	hook->magic = DBAssetHook::MAGIC_COOKIE;
+}
+
+static void wrenLoadAssetContents(WrenVM* vm)
+{
+	blt::idstring name = parseHash(wrenGetSlotString(vm, 1));
+	blt::idstring ext = parseHash(wrenGetSlotString(vm, 2));
+
+	DslFile* file = DieselDB::Instance()->Find(name, ext);
+
+	if (file == nullptr)
+	{
+		wrenSetSlotNull(vm, 0);
+		return;
+	}
+
+	if (!file->HasLength() || !file->Found())
+	{
+		wrenSetSlotString(vm, 0, "Failed to read bundle file, bundle or length not set? Please report to SBLT");
+		wrenAbortFiber(vm, 0);
+		return;
+	}
+
+	// Ahh yes, be sure to enable binary mode
+	// Otherwise stream.read will fail on Windows with failbit set, and won't touch errno
+	// I think I'm getting better at tracking this exact same problem down - this time, it only wasted a
+	// few perfectly good hours of my time.
+	std::ifstream stream(file->bundle->path, std::ios::binary);
+	if (stream.fail())
+	{
+		std::string msg = "Failed to open bundle file containing the asset - " + file->bundle->path;
+		wrenSetSlotString(vm, 0, msg.c_str());
+		wrenAbortFiber(vm, 0);
+		return;
+	}
+
+	// Make sure errno is clear before we do anything, so in some unlikely cornercase where an operation fails without
+	// setting errno it doesn't have some leftover number.
+	errno = 0;
+
+	try
+	{
+		stream.exceptions(std::ios::failbit | std::ios::eofbit);
+
+		std::vector<char> data(file->length);
+		stream.seekg(file->offset, std::ios::beg);
+		stream.read(data.data(), data.size());
+
+		wrenSetSlotBytes(vm, 0, data.data(), data.size());
+	}
+	catch (const std::ios::failure& ex)
+	{
+		char err_buff[128];
+		strerror_s(err_buff, sizeof(err_buff), errno);
+		std::string msg =
+			std::string("Failed to read asset - IO error: ") + std::string(err_buff) + " " + std::string(ex.what());
+		wrenSetSlotString(vm, 0, msg.c_str());
+		wrenAbortFiber(vm, 0);
+	}
 }
 
 bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore,

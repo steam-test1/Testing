@@ -4,6 +4,14 @@ class DBManager {
 	// values may be a regular string (and will automatically be converted to an idstring) or may
 	// start with an at symbol ('@') followed by exactly 16 characters in the range 0-9 and a-z.
 	foreign static register_asset_hook(name, ext)
+
+	// Maybe not the perfect place to put this, but close enough
+	// Loads the contents of an on-disk asset file into a string and returns it, or null if the asset
+	// does not exist.
+	// This does not use any of the normal hooking logic, and ignores mod_overrides.
+	// WARNING: Do NOT use this on files that are not UTF-8 text! This may cause crashes now, or after
+	//  some update of the Wren runtime.
+	foreign static load_asset_contents(name, ext)
 }
 
 foreign class DBAssetHook {

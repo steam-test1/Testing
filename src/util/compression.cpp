@@ -131,14 +131,25 @@ namespace pd2hook
 			const std::string finalWritePath = extractPath + "/" + data.filepath;
 			Util::EnsurePathWritable(finalWritePath);
 
-			std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
-			if (!outFile)
+			// There doesn't seem to be a better way to detect if the "file" in question is a directory.
+			char trailingChar = finalWritePath.at(finalWritePath.size()-1);
+			if(trailingChar == '/' || trailingChar == '\\')
 			{
-				return false;
+				// Ignore directories; They are created automatically when a file is written inside them.
+				return true;
 			}
+			else
+			{
+				std::ofstream outFile(finalWritePath.c_str(), std::ios::binary);
+				if (!outFile)
+				{
+					PD2HOOK_LOG_WARN(std::string("Failed to extract file: ") + finalWritePath);
+					return false;
+				}
 
-			outFile.write(data.decompressedData.data(), data.uncompressedSize);
-			return true;
+				outFile.write(data.decompressedData.data(), data.uncompressedSize);
+				return true;
+			}
 		}
 	}
 

@@ -57,6 +57,9 @@ struct dsl_Vector
 static void skipVector(std::istream& in)
 {
 	in.seekg(sizeof(dsl_Vector), std::ios::cur);
+
+	// Suppress the unused function warning
+	(void)skipVector;
 }
 
 template <typename T> static std::vector<T> loadVector(std::istream& in, int offset, dsl_Vector& vec)
@@ -108,8 +111,19 @@ DieselDB::DieselDB()
 	// Skip a pointer - vtable or allocator probably?
 	in.seekg(sizeof(void*), std::ios::cur);
 
-	// Skip the languages vector for now
-	skipVector(in);
+	// Build out the LanguageID-to-idstring mappings
+	struct LanguageData
+	{
+		idstring name;
+		int id;
+		int padding; // Probably padding, at least - always zero
+	};
+	static_assert(sizeof(LanguageData) == 16);
+	std::map<int, idstring> languages;
+	for (const LanguageData& lang : loadVector<LanguageData>(in, 0))
+	{
+		languages[lang.id] = lang.name;
+	}
 
 	// Sortmap
 	in.seekg(sizeof(void*) * 2, std::ios::cur);
@@ -143,8 +157,14 @@ DieselDB::DieselDB()
 		fi.type = mini.type;
 		fi.fileId = mini.fileId;
 
-		// TODO language management - what do we need for this?
-		fi.langId = mini.langId;
+		// Look up the language idstring, if applicable
+		fi.rawLangId = mini.langId;
+		if (mini.langId == 0)
+			fi.langId = 0;
+		else if (languages.count(mini.langId))
+			fi.langId = languages[mini.langId];
+		else
+			fi.langId = 0x11df684c9591b7e0; // 'unknown' - is in the hashlist, so you'll be able to find it
 
 		// If it's a repeated file, the language must be different
 		const auto& prev = files.find(fi.Key());

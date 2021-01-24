@@ -22,7 +22,8 @@ namespace blt::db
 		idstring name;
 		idstring type;
 		int fileId;
-		int langId;
+		int rawLangId;
+		idstring langId;
 
 		// These are used for reading, and are picked up from the bundle headers
 		DieselBundle* bundle = nullptr;

@@ -18,6 +18,7 @@
 
 namespace fs = std::filesystem;
 using namespace blt::db;
+using blt::idstring;
 
 static_assert(sizeof(void*) == sizeof(intptr_t));
 using pos_t = std::ios::pos_type;

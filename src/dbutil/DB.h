@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Datastore.h"
+#include "platform.h"
 
 #include <map>
 #include <vector>
@@ -15,7 +16,6 @@ namespace blt::db
 		std::string headerPath;
 	};
 
-	typedef unsigned long long idstring;
 	struct DslFile
 	{
 	  public:

@@ -45,7 +45,6 @@ static DslFile* find_file(lua_State* L)
 
 	// For now, block files with languages set - we don't know which one we're getting
 	// TODO let the options table specify the required language
-	printf("Lang ID: " IDPF "\n", file->langId);
 	if (file->langId)
 		return nullptr;
 

@@ -10,7 +10,7 @@ namespace blt::db
 
 	struct DieselBundle
 	{
-	public:
+	  public:
 		std::string path;
 		std::string headerPath;
 	};
@@ -18,14 +18,14 @@ namespace blt::db
 	typedef unsigned long long idstring;
 	struct DslFile
 	{
-	public:
+	  public:
 		idstring name;
 		idstring type;
 		int fileId;
 		int langId;
 
 		// These are used for reading, and are picked up from the bundle headers
-		DieselBundle *bundle = nullptr;
+		DieselBundle* bundle = nullptr;
 		unsigned int offset = ~0u;
 		unsigned int length = ~0u;
 
@@ -47,22 +47,22 @@ namespace blt::db
 
 	class DieselDB
 	{
-	private:
+	  private:
 		DieselDB();
 
-	public:
+	  public:
 		DieselDB(const DieselDB&) = delete;
 		DieselDB& operator=(const DieselDB&) = delete;
 
-		DslFile *Find(idstring name, idstring ext);
+		DslFile* Find(idstring name, idstring ext);
 
-		static DieselDB *Instance();
+		static DieselDB* Instance();
 
-		BLTAbstractDataStore *Open(DieselBundle *bundle);
+		BLTAbstractDataStore* Open(DieselBundle* bundle);
 
-	private:
+	  private:
 		std::vector<DslFile> filesList;
 		std::map<std::pair<idstring, idstring>, DslFile*> files;
 	};
 
-}; // End of namespace
+}; // namespace blt::db

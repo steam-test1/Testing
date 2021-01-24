@@ -278,6 +278,21 @@ const char* resolveModule(WrenVM* vm, const char* importer, const char* name)
 		return strdup(new_module.c_str());
 	}
 
+	// Mod-relative imports
+	if (strncmp(name, ".../", 4) == 0)
+	{
+		string new_module = importer;
+		size_t first_stroke = new_module.find_first_of('/');
+
+		// Must always be there
+		assert(first_stroke != string::npos);
+
+		// Chop off the module name and replace it with what we wanted
+		new_module.erase(first_stroke + 1);
+		new_module.append(name + 4);
+		return strdup(new_module.c_str());
+	}
+
 	// Base imports
 	if (strncmp(name, "base/", 5) == 0)
 	{

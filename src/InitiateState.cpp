@@ -15,6 +15,7 @@
 #include "plugins/plugins.h"
 #include "scriptdata/ScriptData.h"
 #include "luautil/luautil.h"
+#include "luautil/LuaAssetDb.h"
 #include "dbutil/DB.h"
 
 #include <thread>
@@ -924,6 +925,7 @@ namespace blt
 
 			load_scriptdata_library(L);
 			load_lua_utils(L);
+			load_lua_asset_db(L);
 
 			lua_pop(L, 1); // pop the BLT library
 

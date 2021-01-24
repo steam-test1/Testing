@@ -295,7 +295,7 @@ static void wrenLoadAssetContents(WrenVM* vm)
 		char err_buff[128];
 		strerror_s(err_buff, sizeof(err_buff), errno);
 #else
-		const char *err_buff = strerror(errno);
+		const char* err_buff = strerror(errno);
 #endif
 		std::string msg =
 			std::string("Failed to read asset - IO error: ") + std::string(err_buff) + " " + std::string(ex.what());

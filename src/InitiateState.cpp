@@ -341,9 +341,9 @@ namespace pd2hook
 		lua_State* L;
 	};
 
-	void return_lua_http(void* data, std::string& urlcontents, int errorCode)
+	void return_lua_http(std::unique_ptr<HTTPItem> httpItem)
 	{
-		lua_http_data* ourData = (lua_http_data*)data;
+		lua_http_data* ourData = (lua_http_data*)httpItem->data;
 		if (!check_active_state(ourData->L))
 		{
 			delete ourData;
@@ -351,9 +351,18 @@ namespace pd2hook
 		}
 
 		lua_rawgeti(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
-		lua_pushlstring(ourData->L, urlcontents.c_str(), urlcontents.length());
+		lua_pushlstring(ourData->L, httpItem->url.c_str(), httpItem->url.length());
 		lua_pushinteger(ourData->L, ourData->requestIdentifier);
-		lua_pushinteger(ourData->L, errorCode);
+		lua_newtable(ourData->L);
+		lua_pushstring(ourData->L, "statusCode");
+		lua_pushstring(ourData->L, std::to_string(httpItem->errorCode).c_str());
+		lua_settable(ourData->L, -3);
+		for(std::pair<std::string, std::string> element:httpItem->responseHeaders)
+		{
+			lua_pushstring(ourData->L, element.first.c_str());
+			lua_pushstring(ourData->L, element.second.c_str());
+			lua_settable(ourData->L, -3);
+		}
 		handled_pcall(ourData->L, 3, 0);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->progressRef);

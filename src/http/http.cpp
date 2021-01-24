@@ -87,6 +87,26 @@ namespace pd2hook
 		openssl_locks[lockno].unlock();
 	}
 
+	size_t write_http_header(char* ptr, size_t size, size_t nmemb, void* data)
+	{
+		HTTPItem* mainItem = (HTTPItem*)data;
+		size_t headerLineSize = size*nmemb;
+		std::string headerLine = std::string(ptr, headerLineSize);
+		size_t delimiterPosition = headerLine.find(": ");
+		if(delimiterPosition != std::string::npos)
+		{
+			std::string headerKey = headerLine.substr(0, delimiterPosition);
+			std::string headerValue = headerLine.substr(delimiterPosition + 2);
+			size_t valLen = headerValue.length();
+			if(valLen > 2 && headerValue.at(valLen - 1) == '\n' && headerValue.at(valLen - 2) == '\r')
+			{
+				headerValue=headerValue.substr(0, valLen-2);
+			}
+			mainItem->responseHeaders.insert({headerKey, headerValue});
+		}
+		return headerLineSize;
+	}
+
 	size_t write_http_data(char* ptr, size_t size, size_t nmemb, void* data)
 	{
 		std::string newData = std::string(ptr, size*nmemb);
@@ -125,7 +145,7 @@ namespace pd2hook
 	void run_http_event(std::unique_ptr<HTTPItem> ourItem)
 	{
 		PD2HOOK_TRACE_FUNC;
-		ourItem->call(ourItem->data, ourItem->httpContents, ourItem->errorCode);
+		ourItem->call(std::move<>(ourItem));
 	}
 
 	void launch_thread_http(HTTPItem *raw_item)
@@ -143,7 +163,6 @@ namespace pd2hook
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 900L);
 		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 30L);
 		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1000L);
-		curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "SuperBLT");
 
@@ -154,6 +173,8 @@ namespace pd2hook
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		}
 
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_http_header);
+		curl_easy_setopt(curl, CURLOPT_HEADERDATA, item.get());
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_http_data);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, item.get());
 

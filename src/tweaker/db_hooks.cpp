@@ -338,8 +338,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		{
 			char buff[1024];
 			memset(buff, 0, sizeof(buff));
-			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked file '%s' while loading %16llx.%016llx",
-			         filename.c_str(), asset_file.name, asset_file.ext);
+			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked file '%s' while loading " IDPFP, filename.c_str(),
+			         asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
 #ifdef _WIN32
@@ -365,9 +365,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		{
 			char buff[1024];
 			memset(buff, 0, sizeof(buff));
-			snprintf(buff, sizeof(buff) - 1,
-			         "Failed to open hooked asset file %016llx.%016llx while loading %16llx.%016llx", bundle_item.name,
-			         bundle_item.ext, asset_file.name, asset_file.ext);
+			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked asset file " IDPFP " while loading " IDPFP,
+			         bundle_item.name, bundle_item.ext, asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
 #ifdef _WIN32
@@ -407,11 +406,11 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		wrenSetSlotHandle(vm, 0, target.wren_loader_obj);
 
 		// Set the name
-		snprintf(hex, sizeof(hex), "%016llx", asset_file.name);
+		snprintf(hex, sizeof(hex), IDPF, asset_file.name);
 		wrenSetSlotString(vm, 1, hex);
 
 		// Set the extension
-		snprintf(hex, sizeof(hex), "%016llx", asset_file.ext);
+		snprintf(hex, sizeof(hex), IDPF, asset_file.ext);
 		wrenSetSlotString(vm, 2, hex);
 
 		// Invoke it - if it fails the game is very likely going to crash anyway, so make it descriptive now
@@ -420,7 +419,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		{
 			char buff[1024];
 			memset(buff, 0, sizeof(buff));
-			snprintf(buff, sizeof(buff) - 1, "Wren asset load failed for %016llx.%016llx: compile or runtime error!",
+			snprintf(buff, sizeof(buff) - 1, "Wren asset load failed for " IDPFP ": compile or runtime error!",
 			         asset_file.name, asset_file.ext);
 			PD2HOOK_LOG_ERROR(buff);
 
@@ -439,7 +438,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 			char buff[1024];
 			memset(buff, 0, sizeof(buff));
 			snprintf(buff, sizeof(buff) - 1,
-			         "Wren load_file function return invalid class or null - for asset %016llx.%016llx ptr %p",
+			         "Wren load_file function return invalid class or null - for asset " IDPFP " ptr %p",
 			         asset_file.name, asset_file.ext, ff);
 			PD2HOOK_LOG_ERROR(buff);
 #ifdef _WIN32
@@ -604,7 +603,7 @@ void DBAssetHook::getDirectBundle(WrenVM* vm)
 
 	char buff[128];
 	memset(buff, 0, sizeof(buff));
-	snprintf(buff, sizeof(buff) - 1, "@%016llx.@%016llx", it->direct_bundle.name, it->direct_bundle.ext);
+	snprintf(buff, sizeof(buff) - 1, "@" IDPFP, it->direct_bundle.name, it->direct_bundle.ext);
 	wrenSetSlotString(vm, 0, buff);
 }
 

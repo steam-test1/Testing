@@ -95,7 +95,7 @@ void io_idstring_hash(WrenVM* vm)
 	blt::idstring hash = blt::idstring_hash(wrenGetSlotString(vm, 1));
 
 	char hex[17]; // 16-chars long +1 for the null
-	snprintf(hex, sizeof(hex), "%016llx", hash);
+	snprintf(hex, sizeof(hex), IDPF, hash);
 	wrenSetSlotString(vm, 0, hex);
 }
 
@@ -319,10 +319,10 @@ const char* tweaker::transform_file(const char* text)
 
 	wrenSetSlotHandle(vm, 0, tweakerClass);
 
-	snprintf(hex, sizeof(hex), "%016llx", *blt::platform::last_loaded_name);
+	snprintf(hex, sizeof(hex), IDPF, *blt::platform::last_loaded_name);
 	wrenSetSlotString(vm, 1, hex);
 
-	snprintf(hex, sizeof(hex), "%016llx", *blt::platform::last_loaded_ext);
+	snprintf(hex, sizeof(hex), IDPF, *blt::platform::last_loaded_ext);
 	wrenSetSlotString(vm, 2, hex);
 
 	wrenSetSlotString(vm, 3, text);

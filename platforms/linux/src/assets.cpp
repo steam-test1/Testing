@@ -204,6 +204,71 @@ namespace blt
 
 	EACH_HOOK(HOOK_VARS)
 
+	static void open_custom_asset(Archive* target, DB* db, const string& filename, asset_t::asset_type type)
+	{
+		struct stat buffer = {};
+		if (stat(filename.c_str(), &buffer))
+		{
+			string err = "Cannot open registered asset " + filename;
+			log::log(err, log::LOG_ERROR);
+			throw err;
+		}
+
+		libcxxstring cxxstr = filename; // Use a LibCXX-ABI-compatible string thing
+
+		// Some assets are different on the 32-bit (Windows) and 64-bit (Linux) versions of PAYDAY, so we need to
+		// recode them
+		if (type != asset_t::PLAIN)
+		{
+			// Create a datastore. This is what you might call a backing object, which the archive will refer to.
+			// Note that the archive will delete the datastore when it's done, so this isn't a memory leak.
+			auto* datastore = new StringDataStore("");
+
+			// Read the file in question
+			std::ifstream in(filename, std::ios::in | std::ios::binary);
+			if (!in)
+			{
+				// TODO error message
+				abort();
+			}
+
+			std::string& contents = datastore->contents;
+			in.seekg(0, std::ios::end);
+			contents.resize(in.tellg());
+			in.seekg(0, std::ios::beg);
+			in.read(&contents[0], contents.size());
+			in.close();
+
+			switch (type)
+			{
+			case asset_t::SCRIPTDATA:
+			{
+				pd2hook::scriptdata::ScriptData sd(contents.size(), (const uint8_t*)contents.c_str());
+				contents = sd.GetRoot()->Serialise(false);
+				break;
+			}
+			case asset_t::FONT:
+			{
+				pd2hook::scriptdata::font::FontData fd(contents);
+				contents = fd.Export(false);
+				break;
+			}
+			default:
+				string msg = "Unknown asset typecode " + to_string(type) +
+							 " - this is probably a bug in SuperBLT, please report it";
+				throw msg;
+			}
+
+			// Create an archive using our datastore, in the memory location passed in (this is how
+			// an object is returned in C++ - memory is allocated by the caller, and the pointer is passed
+			// in the first argument, even before "this").
+			archive_ctor(target, cxxstr, datastore, 0, datastore->size(), false, nullptr);
+			return;
+		}
+
+		dsl_fss_open(target, &db->stack, &cxxstr);
+	}
+
 	// A generic hook function
 	// This can be used with all four of the template values, and it passes everything through to the supplied original
 	// function if nothing has changed.
@@ -218,67 +283,7 @@ namespace blt
 		{
 			const asset_t& asset = custom_assets[hash];
 
-			struct stat buffer;
-			if (stat(asset.filename.c_str(), &buffer))
-			{
-				string err = "Cannot open registered asset " + asset.filename;
-				log::log(err, log::LOG_ERROR);
-				throw err;
-			}
-
-			libcxxstring cxxstr = asset.filename; // Use a LibCXX-ABI-compatible string thing
-
-			// Some assets are different on the 32-bit (Windows) and 64-bit (Linux) versions of PAYDAY, so we need to
-			// recode them
-			if (asset.type != asset_t::PLAIN)
-			{
-				// Create a datastore. This is what you might call a backing object, which the archive will refer to.
-				// Note that the archive will delete the datastore when it's done, so this isn't a memory leak.
-				StringDataStore* datastore = new StringDataStore("");
-
-				// Read the file in question
-				std::ifstream in(asset.filename, std::ios::in | std::ios::binary);
-				if (!in)
-				{
-					// TODO error message
-					abort();
-				}
-
-				std::string& contents = datastore->contents;
-				in.seekg(0, std::ios::end);
-				contents.resize(in.tellg());
-				in.seekg(0, std::ios::beg);
-				in.read(&contents[0], contents.size());
-				in.close();
-
-				switch (asset.type)
-				{
-				case asset_t::SCRIPTDATA:
-				{
-					pd2hook::scriptdata::ScriptData sd(contents.size(), (const uint8_t*)contents.c_str());
-					contents = sd.GetRoot()->Serialise(false);
-					break;
-				}
-				case asset_t::FONT:
-				{
-					pd2hook::scriptdata::font::FontData fd(contents);
-					contents = fd.Export(false);
-					break;
-				}
-				default:
-					string msg = "Unknown asset typecode " + to_string(asset.type) +
-								 " - this is probably a bug in SuperBLT, please report it";
-					throw msg;
-				}
-
-				// Create an archive using our datastore, in the memory location passed in (this is how
-				// an object is returned in C++ - memory is allocated by the caller, and the pointer is passed
-				// in the first argument, even before "this").
-				archive_ctor(target, cxxstr, datastore, 0, datastore->size(), false, nullptr);
-				return target;
-			}
-
-			dsl_fss_open(target, &db->stack, &cxxstr);
+			open_custom_asset(target, db, asset.filename, asset.type);
 			return target;
 		}
 

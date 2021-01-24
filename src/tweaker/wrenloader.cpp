@@ -1,5 +1,6 @@
 #include "wrenloader.h"
 
+#include <assert.h>
 #include <fstream>
 #include <vector>
 
@@ -12,6 +13,12 @@
 #include "xmltweaker_internal.h"
 
 #include <wren.hpp>
+
+// Suboptimal hack for IO.dynamic_import - see the resolver function
+extern "C"
+{
+#include "../../lib/wren/src/vm/wren_vm.h"
+}
 
 #include "wren_generated_src.h"
 
@@ -208,6 +215,105 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	return nullptr;
 }
 
+const char* resolveModule(WrenVM* vm, const char* importer, const char* name)
+{
+	// If this is being imported by IO.dynamic_import, find out who called that
+	// (filter out meta since that's the one file that base/native imports itself, and that always resolves
+	//  to itself anyway so skipping this wouldn't matter)
+	// (also note we can get away with this since we now embed base/native anyway)
+	if (strcmp(importer, "base/native") == 0 && strcmp(name, "meta") != 0)
+	{
+		// Poke around in Wren's internals to do this - not ideal but hey it works (for now...)
+		ObjFiber* fibre = vm->fiber;
+
+		// At this point, the callstack will look like this (bottom=newest, same as python):
+		//
+		// -4  «caller module»           caller()
+		// -3      base/native  dynamic_import(_)
+		// -2             meta            eval(_)  <- This is the Wren function which wraps the native _compile function
+		// -1      base/native           (script)  <- This is a script that contains only an import statement
+		//
+		// (also if it's not obvious already, this is very much reliant on Wren's implementation details - be
+		//  careful when updating it should they decide to change how meta is implemented)
+		// This means we have to subtract four from the frame count to get our frame - one to go from the length
+		//  of the array to the index of the last element, then three to skip dynamic_import, eval and the import
+		//  script (the bit of code that contains the actual import statement that base/native builds).
+
+		assert(fibre->numFrames >= 4); // Make sure we have enough frames here
+		ObjModule* origin = fibre->frames[fibre->numFrames - 4].closure->fn->module;
+		importer = origin->name->value;
+
+		// Little utility to generate traces like above:
+		// printf("Caught native import: %s -> %s\n", importer, name);
+		// for (int i = 0; i < fibre->numFrames; i++)
+		// {
+		// 	CallFrame* frame = &fibre->frames[i];
+		// 	printf("Frame: %30s %30s\n", frame->closure->fn->module->name->value, frame->closure->fn->debug->name);
+		// }
+	}
+
+	// Rules for imports:
+	// Anything starting with ./ means relative to this module
+	// Anything starting with .../ means relative to this mod
+	// Anything starting with base/ refers to files in the basemod or DLL
+	// Anything starting with mods/ refers to published files in another mod - yet to figure out how this will work
+	// Anything starting with __raw_force_load/ refers to the rest of that string directly (please don't abuse this!)
+	// The 'meta' and 'random' modules from Wren resolve directly to themselves
+	// Anything else is reserved and may be used for something else later
+
+	// The actual module name is still in the format of mod/path/a/b/c which would load to mods/mod/path/a/b/c.wren
+
+	// Relative imports
+	if (strncmp(name, "./", 2) == 0)
+	{
+		string new_module = importer;
+		size_t last_stroke = new_module.find_last_of('/');
+
+		// Must always be there
+		assert(last_stroke != string::npos);
+
+		// Chop off the module name and replace it with what we wanted
+		new_module.erase(last_stroke + 1);
+		new_module.append(name + 2);
+		return strdup(new_module.c_str());
+	}
+
+	// Base imports
+	if (strncmp(name, "base/", 5) == 0)
+	{
+		// Block importing anything other than base/native and base/native/* unless this is coming from the base module
+		if (strcmp(name, "base/native") == 0 || strncmp(name, "base/native/", 12) == 0)
+			return name;
+
+		// So since it's not one of the above, make sure this is coming from the base module
+		if (strncmp(importer, "base/", 5) == 0)
+			return name;
+	}
+
+	// Meta and random module
+	if (strcmp(name, "meta") == 0 || strcmp(name, "random") == 0)
+	{
+		return name;
+	}
+
+	// The __raw_force_load/ thing
+	if (strncmp(name, "__raw_force_load/", strlen("__raw_force_load/")) == 0)
+	{
+		return strdup(name + strlen("__raw_force_load/"));
+	}
+
+	// Special cases:
+
+	// If it's being loaded by the root module (which is the entry point into wren), use the path directly
+	if (strcmp(importer, "__root") == 0)
+	{
+		return name;
+	}
+
+	// Anything else is an invalid path
+	return nullptr;
+}
+
 static WrenLoadModuleResult getModulePath([[maybe_unused]] WrenVM* vm, const char* name_c)
 {
 	// First see if this is a module that's embedded within SuperBLT
@@ -289,6 +395,7 @@ WrenVM* pd2hook::wren::get_wren_vm()
 		config.errorFn = &err;
 		config.bindForeignMethodFn = &bindForeignMethod;
 		config.bindForeignClassFn = &bindForeignClass;
+		config.resolveModuleFn = &resolveModule;
 		config.loadModuleFn = &getModulePath;
 		vm = wrenNewVM(&config);
 

@@ -12,6 +12,7 @@
 #include "debug/blt_debug.h"
 #include "xaudio/XAudio.h"
 #include "tweaker/xmltweaker.h"
+#include "tweaker/wren_lua_interface.h"
 #include "plugins/plugins.h"
 #include "scriptdata/ScriptData.h"
 #include "luautil/luautil.h"
@@ -926,6 +927,7 @@ namespace blt
 			load_scriptdata_library(L);
 			load_lua_utils(L);
 			load_lua_asset_db(L);
+			pd2hook::tweaker::lua_io::register_lua_functions(L);
 
 			lua_pop(L, 1); // pop the BLT library
 

@@ -7,6 +7,7 @@
 #include "global.h"
 #include "plugins/plugins.h"
 #include "util/util.h"
+#include "wren_lua_interface.h"
 #include "wrenxml.h"
 #include "xmltweaker_internal.h"
 
@@ -148,6 +149,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	WrenForeignMethodFn dbhook_method = dbhook::bind_dbhook_method(vm, module, className, isStatic, signature);
 	if (dbhook_method)
 		return dbhook_method;
+
+	WrenForeignMethodFn lua_io_method = lua_io::bind_wren_lua_method(vm, module, className, isStatic, signature);
+	if (lua_io_method)
+		return lua_io_method;
 
 	if (strcmp(module, "base/native") == 0)
 	{

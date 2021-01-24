@@ -20,12 +20,14 @@
 
 #include <scriptdata/FontData.h>
 #include <scriptdata/ScriptData.h>
+#include <tweaker/db_hooks.h>
 
 #define hook_remove(hookName) subhook::ScopedHookRemove _sh_remove_raii(&hookName)
 
 PackageManager::find_t PackageManager::find = nullptr;
 PackageManager::resource_t PackageManager::resource = nullptr;
 
+using pd2hook::tweaker::dbhook::hook_asset_load;
 using namespace std;
 using namespace dsl;
 
@@ -269,6 +271,18 @@ namespace blt
 		dsl_fss_open(target, &db->stack, &cxxstr);
 	}
 
+	static bool try_hook_load(Archive* target, hash_t asset, bool fallback)
+	{
+		blt::idfile id(asset.first, asset.second);
+		BLTAbstractDataStore* datastore = nullptr;
+		int64_t pos = 0, len = 0;
+		std::string ds_name;
+		if (!hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback))
+			return false;
+		archive_ctor(target, libcxxstring(ds_name), (CustomDataStore*)datastore, pos, len, false, nullptr);
+		return true;
+	}
+
 	// A generic hook function
 	// This can be used with all four of the template values, and it passes everything through to the supplied original
 	// function if nothing has changed.
@@ -279,6 +293,11 @@ namespace blt
 		// TODO caching support!
 
 		hash_t hash(name->value, ext->value);
+
+		// First let Wren override the files
+		if (try_hook_load(target, hash, false))
+			return target;
+
 		if (custom_assets.count(hash))
 		{
 			const asset_t& asset = custom_assets[hash];
@@ -287,7 +306,16 @@ namespace blt
 			return target;
 		}
 
-		return original(target, db, ext, name, misc_object, transport);
+		original(target, db, ext, name, misc_object, transport);
+
+		// If the asset failed to load, then look for Wren assets again but this time in fallback mode
+		if (!target->datastore)
+		{
+			if (try_hook_load(target, hash, true))
+				return target;
+		}
+
+		return target;
 
 		/* // Code for doing the same thing as the original function (minus mod_override support):
 		int result = resolve(

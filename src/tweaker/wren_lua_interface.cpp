@@ -82,6 +82,77 @@ WrenForeignMethodFn pd2hook::tweaker::lua_io::bind_wren_lua_method(WrenVM* vm, c
 
 /////////// Lua side ///////////
 
+static void push_wren_to_lua(WrenVM* vm, int wren_slot, lua_State* L, bool allow_complex)
+{
+	switch (wrenGetSlotType(vm, wren_slot))
+	{
+	case WREN_TYPE_BOOL:
+		lua_pushboolean(L, wrenGetSlotBool(vm, wren_slot));
+		break;
+	case WREN_TYPE_NUM:
+		lua_pushnumber(L, wrenGetSlotDouble(vm, wren_slot));
+		break;
+	case WREN_TYPE_STRING:
+		lua_pushstring(L, wrenGetSlotString(vm, wren_slot));
+		break;
+	case WREN_TYPE_LIST:
+		if (allow_complex)
+		{
+			// +1 to convert from an index to a count, plus one for the temporary value
+			wrenEnsureSlots(vm, wren_slot + 2);
+
+			int count = wrenGetListCount(vm, wren_slot);
+			lua_createtable(L, count, 0);
+			for (int i = 0; i < count; i++)
+			{
+				wrenGetListElement(vm, wren_slot, i, wren_slot + 1);
+				push_wren_to_lua(vm, wren_slot + 1, L, false);
+				lua_rawseti(L, -2, i + 1);
+			}
+			break;
+		}
+	case WREN_TYPE_MAP:
+		if (allow_complex)
+		{
+			// +1 to convert from an index to a slot, +1 for the key and +1 for the value
+			wrenEnsureSlots(vm, wren_slot + 3);
+
+			lua_newtable(L);
+
+			// FIXME there doesn't seem to be any way to iterate over a map, so do it the hacky way
+			ObjMap* map = AS_MAP(vm->apiStack[wren_slot]);
+
+			for (uint32_t i = 0; i < map->capacity; i++)
+			{
+				MapEntry& entry = map->entries[i];
+				Value value = entry.value;
+				if (entry.key == UNDEFINED_VAL)
+					continue;
+
+				if (!IS_STRING(entry.key))
+					continue;
+
+				if (IS_NUM(value))
+					lua_pushnumber(L, AS_NUM(value));
+				else if (IS_STRING(value))
+					lua_pushstring(L, AS_CSTRING(value));
+				else if (IS_BOOL(value))
+					lua_pushboolean(L, AS_BOOL(value));
+				else
+					continue;
+
+				lua_setfield(L, -2, AS_CSTRING(entry.key));
+			}
+
+			break;
+		}
+	default:
+		// Just ignore any unknown types and convert them to null
+		lua_pushnil(L);
+		break;
+	}
+}
+
 static int wren_lua_invoke(lua_State* L)
 {
 	// Load the arguments list
@@ -158,6 +229,11 @@ static int wren_lua_invoke(lua_State* L)
 			snprintf(run_err_str, sizeof(run_err_str) - 1, "Wren error occurred during invocation");
 			run_success = false;
 		}
+		else
+		{
+			// Push the return value of the Wren function onto the Lua stack
+			push_wren_to_lua(vm, 0, L, true);
+		}
 
 	done:
 		wrenReleaseHandle(vm, res);
@@ -168,7 +244,7 @@ static int wren_lua_invoke(lua_State* L)
 
 	// TODO return the Wren return value
 
-	return 0;
+	return 1;
 }
 
 void pd2hook::tweaker::lua_io::register_lua_functions(lua_State* L)

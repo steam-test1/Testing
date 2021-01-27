@@ -365,12 +365,15 @@ namespace pd2hook
 		lua_pushstring(ourData->L, "url");
 		lua_pushstring(ourData->L, httpItem->url.c_str());
 		lua_settable(ourData->L, -3);
+		lua_pushstring(ourData->L, "headers");
+		lua_newtable(ourData->L);
 		for(std::pair<std::string, std::string> element:httpItem->responseHeaders)
 		{
 			lua_pushstring(ourData->L, element.first.c_str());
 			lua_pushstring(ourData->L, element.second.c_str());
 			lua_settable(ourData->L, -3);
 		}
+		lua_settable(ourData->L, -3);
 		handled_pcall(ourData->L, 3, 0);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		luaL_unref(ourData->L, LUA_REGISTRYINDEX, ourData->progressRef);

@@ -25,7 +25,7 @@ namespace pd2hook
 		std::string httpContents;
 		std::map<std::string, std::string> responseHeaders;
 		int errorCode;
-		int httpStatusCode;
+		long httpStatusCode;
 		void* data = nullptr;
 
 		long byteprogress = 0;

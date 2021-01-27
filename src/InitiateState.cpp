@@ -349,13 +349,18 @@ namespace pd2hook
 			delete ourData;
 			return;
 		}
+		int statusCode = httpItem->httpStatusCode;
+		bool querySucceeded = httpItem->errorCode == 0 && statusCode >= 100 && statusCode < 400;
 
 		lua_rawgeti(ourData->L, LUA_REGISTRYINDEX, ourData->funcRef);
 		lua_pushlstring(ourData->L, httpItem->url.c_str(), httpItem->url.length());
 		lua_pushinteger(ourData->L, ourData->requestIdentifier);
 		lua_newtable(ourData->L);
 		lua_pushstring(ourData->L, "statusCode");
-		lua_pushstring(ourData->L, std::to_string(httpItem->errorCode).c_str());
+		lua_pushinteger(ourData->L, statusCode);
+		lua_settable(ourData->L, -3);
+		lua_pushstring(ourData->L, "querySucceeded");
+		lua_pushboolean(ourData->L, querySucceeded);
 		lua_settable(ourData->L, -3);
 		for(std::pair<std::string, std::string> element:httpItem->responseHeaders)
 		{

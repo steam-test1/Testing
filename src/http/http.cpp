@@ -179,6 +179,7 @@ namespace pd2hook
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, item.get());
 
 		item->errorCode = curl_easy_perform(curl);
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(item->httpStatusCode));
 		curl_easy_cleanup(curl);
 
 		GetHTTPItemQueue().AddToQueue(run_http_event, std::move(item));

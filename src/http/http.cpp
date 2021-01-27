@@ -145,7 +145,7 @@ namespace pd2hook
 	void run_http_event(std::unique_ptr<HTTPItem> ourItem)
 	{
 		PD2HOOK_TRACE_FUNC;
-		ourItem->call(std::move<>(ourItem));
+		ourItem->call(ourItem.get());
 	}
 
 	void launch_thread_http(HTTPItem *raw_item)

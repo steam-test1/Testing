@@ -341,7 +341,7 @@ namespace pd2hook
 		lua_State* L;
 	};
 
-	void return_lua_http(std::unique_ptr<HTTPItem> httpItem)
+	void return_lua_http(HTTPItem* httpItem)
 	{
 		lua_http_data* ourData = (lua_http_data*)httpItem->data;
 		if (!check_active_state(ourData->L))

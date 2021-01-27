@@ -14,7 +14,7 @@ namespace pd2hook
 	void download_blt();
 	struct HTTPItem;
 
-	typedef void(*HTTPCallback)(std::unique_ptr<HTTPItem> httpItem);
+	typedef void(*HTTPCallback)(HTTPItem* httpItem);
 	typedef void(*HTTPProgress)(void* data, long progress, long total);
 
 	struct HTTPItem

@@ -115,6 +115,11 @@ if(UNIX)
 		message(WARNING "USE_LIBCXX: LibCXX is no longer required for "
 			"the asset system, the flag will be ignored, and the default compiler used.")
 	endif()
+
+	# Debugging shim - there's no harm in always building this
+	add_library(debug_shim SHARED platforms/linux/sblt_shim/sblt_shim.c)
+	target_link_libraries(debug_shim dl)
+
 elseif(WIN32)
 	add_library(SuperBLT STATIC ${sources} ${win32_sources})
 	target_compile_options(SuperBLT PRIVATE

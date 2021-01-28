@@ -3,8 +3,12 @@ extern "C" {
 #include <sys/stat.h>
 }
 
-#include <lua.h>
 #include <blt/lapi_compat.hh>
+#include <string.h>
+#include <errno.h>
+#include <lua.h>
+#include <unistd.h>
+#include <string>
 
 using namespace blt;
 
@@ -24,9 +28,17 @@ namespace blt
 					luaL_error(state, "SystemFS:exists(path) -> argument 'path' must be a string!");
 
 				// assuming PWD is base folder
-				const char* path = lua_tolstring(state, -1, NULL);
-				struct stat _stat;
-				lua_pushboolean(state, stat(path, &_stat) == 0);
+				std::string path = lua_tostring(state, -1);
+
+				// If there is a trailing stroke (and this isn't an empty string), ignore it. Sometimes a mod
+				// will pass a filepath in with a trailing stroke, and that seems to work on Windows.
+				// TODO test the Windows version and double-check this
+				while (path.size() > 1 && path.back() == '/')
+					path.erase(path.size() - 1);
+
+				struct stat _stat = {};
+				int res = stat(path.c_str(), &_stat);
+				lua_pushboolean(state, res == 0);
 				return 1;
 			}
 		}

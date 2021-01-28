@@ -34,6 +34,10 @@ namespace dsl
 		char lock[40];
 		DataStore *datastore;
 		uint64_t datastore_safe_counter_id;
+
+		// Add a way to setup these objects from SBLT - we still have to initialise them though, this just makes
+		// the compiler happy. Note these are all inline since they don't exist.
+		inline explicit Archive() : str("") {};
 	};
 };
 

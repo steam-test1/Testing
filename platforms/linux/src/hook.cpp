@@ -19,6 +19,7 @@ extern "C" {
 #include <blt/log.hh>
 #include <blt/assets.hh>
 #include <blt/lapi_compat.hh>
+#include <blt/png_parser.hh>
 
 #include <InitState.h>
 #include <lua_functions.h>
@@ -114,6 +115,14 @@ namespace blt
 		// Add our custom Lua members - ie, the blt.create_entry function
 		asset_add_lua_members(state);
 
+		// If we haven't already set up the PNG handler, do so now
+		// The reason we don't do it at startup is that PD2's global constructor would overwrite it.
+		static bool hasInstalledPngHandler = false;
+		if (!hasInstalledPngHandler)
+		{
+			install_png_parser();
+		}
+
 		return returnVal;
 	}
 
@@ -206,6 +215,7 @@ namespace blt
 		}
 
 		init_asset_hook(dlHandle);
+		init_png_parser(dlHandle);
 
 		pd2hook::InitiateStates(); // TODO move this into the blt namespace
 #undef setcall

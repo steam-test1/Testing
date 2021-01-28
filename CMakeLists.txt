@@ -110,6 +110,16 @@ if(UNIX)
 	# Enable this to see missing references:
 	#set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -z defs")
 
+	# Yay fantastic. If you link something with -fPIC, then *every* function call
+	# will go through a PLT entry so that a dynamic library can override it. This
+	# causes something of a natural problem for us - we're compiling our own version
+	# of zlib specifically so that it is separate from the game's version (which will
+	# be used by the dynamic linker in preference to another library).
+	# This lovely linker flag stops the linker from doing that. It'll still properly
+	# make PLT entries for symbols imported from the basegame or other libraries, but
+	# it won't let anything mess with ours.
+	target_link_libraries(SuperBLT -Wl,-Bsymbolic-functions)
+
 	# Error for anyone using USE_LIBCXX
 	if (USE_LIBCXX)
 		message(WARNING "USE_LIBCXX: LibCXX is no longer required for "
@@ -215,9 +225,26 @@ if(WIN32)
 	target_link_libraries(libcurl crypto ssl)
 	target_link_libraries(SuperBLT libcurl)
 else()
-	find_package(ZLIB REQUIRED)
-	include_directories (${ZLIB_INCLUDE_DIRS})
-	target_link_libraries(SuperBLT ${ZLIB_LIBRARIES})
+
+	# Build our own version of zlib - the game has it's own copy of zlib compiled in so
+	# the dynamic linker will use that rather than the system version, leading to all
+	# kinds of horrid and hard-to-diagnose issues.
+	set(ZLIB_SRCS adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c inflate.c infback.c
+		inftrees.c inffast.c trees.c uncompr.c zutil.c)
+	list(TRANSFORM ZLIB_SRCS PREPEND lib/sys/zlib/)
+	add_library(zstatic STATIC ${ZLIB_SRCS})
+	target_compile_options(zstatic PRIVATE -fPIC)
+	target_link_libraries(SuperBLT zstatic)
+
+	# We need LibPNG for the image support. We have to compile this ourselves so we can
+	# use our built-in copy of zlib.
+	set(libpng_sources png.c pngerror.c pngget.c pngmem.c pngpread.c pngread.c pngrio.c pngrtran.c pngrutil.c pngset.c
+		pngtrans.c pngwio.c pngwrite.c pngwtran.c pngwutil.c)
+	list(TRANSFORM libpng_sources PREPEND lib/sys/libpng/)
+	add_library(png_static STATIC ${libpng_sources})
+	target_compile_options(png_static PRIVATE -fPIC)
+	target_link_libraries(png_static PUBLIC zstatic)
+	target_link_libraries(SuperBLT png_static)
 
 	find_package (CURL REQUIRED)
 	include_directories (${CURL_INCLUDE_DIRS})

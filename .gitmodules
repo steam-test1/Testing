@@ -17,3 +17,6 @@
 [submodule "lib/sys/curl"]
 	path = lib/sys/curl
 	url = https://github.com/curl/curl.git
+[submodule "lib/sys/libpng"]
+	path = lib/sys/libpng
+	url = https://github.com/glennrp/libpng.git

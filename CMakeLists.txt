@@ -238,9 +238,11 @@ else()
 	include(cmake/libpng.cmake)
 	target_link_libraries(SuperBLT png_static)
 
-	find_package (CURL REQUIRED)
-	include_directories (${CURL_INCLUDE_DIRS})
-	target_link_libraries(SuperBLT ${CURL_LIBRARY})
+	# Build our own version of CURL. Using the system version was causing a variety of
+	# issues, ranging from not running inside the steam runtime to crashes from longjmp
+	# caused by a DNS lookup timeout.
+	include(cmake/curl.cmake)
+	target_link_libraries(SuperBLT libcurl)
 
 	find_package (OpenSSL REQUIRED)
 	include_directories (${OPENSSL_INCLUDE_DIR})

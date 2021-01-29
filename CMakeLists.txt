@@ -225,25 +225,17 @@ if(WIN32)
 	target_link_libraries(libcurl crypto ssl)
 	target_link_libraries(SuperBLT libcurl)
 else()
+	# TODO merge this and the Windows dependencies section together, where useful
 
 	# Build our own version of zlib - the game has it's own copy of zlib compiled in so
 	# the dynamic linker will use that rather than the system version, leading to all
 	# kinds of horrid and hard-to-diagnose issues.
-	set(ZLIB_SRCS adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c inflate.c infback.c
-		inftrees.c inffast.c trees.c uncompr.c zutil.c)
-	list(TRANSFORM ZLIB_SRCS PREPEND lib/sys/zlib/)
-	add_library(zstatic STATIC ${ZLIB_SRCS})
-	target_compile_options(zstatic PRIVATE -fPIC)
+	include(cmake/zlib.cmake)
 	target_link_libraries(SuperBLT zstatic)
 
 	# We need LibPNG for the image support. We have to compile this ourselves so we can
 	# use our built-in copy of zlib.
-	set(libpng_sources png.c pngerror.c pngget.c pngmem.c pngpread.c pngread.c pngrio.c pngrtran.c pngrutil.c pngset.c
-		pngtrans.c pngwio.c pngwrite.c pngwtran.c pngwutil.c)
-	list(TRANSFORM libpng_sources PREPEND lib/sys/libpng/)
-	add_library(png_static STATIC ${libpng_sources})
-	target_compile_options(png_static PRIVATE -fPIC)
-	target_link_libraries(png_static PUBLIC zstatic)
+	include(cmake/libpng.cmake)
 	target_link_libraries(SuperBLT png_static)
 
 	find_package (CURL REQUIRED)

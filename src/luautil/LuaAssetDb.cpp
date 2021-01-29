@@ -43,6 +43,10 @@ static DslFile* find_file(lua_State* L)
 
 	DslFile* file = DieselDB::Instance()->Find(name, ext);
 
+	// If it's not found, stop here - otherwise we'll crash when finding the language ID
+	if (!file)
+		return nullptr;
+
 	// For now, block files with languages set - we don't know which one we're getting
 	// TODO let the options table specify the required language
 	if (file->langId)

@@ -84,8 +84,9 @@ static int ldb_load(lua_State* L)
 	errno = 0;
 	try
 	{
-		std::ifstream fi(file->bundle->path);
+		std::ifstream fi;
 		fi.exceptions(std::ios::failbit);
+		fi.open(file->bundle->path, std::ios::binary);
 
 		fi.seekg(file->offset);
 

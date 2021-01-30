@@ -140,7 +140,7 @@ class PNGParser final : public dsl::ImageParser
 			abort();
 		}
 
-		int data_size = bytes_per_pix * format->width * format->height;
+		[[maybe_unused]] int data_size = bytes_per_pix * format->width * format->height;
 		assert((int)image_buffer.size() == data_size);
 		memcpy(pixel_data, image_buffer.data(), image_buffer.size());
 	}

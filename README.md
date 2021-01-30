@@ -132,6 +132,12 @@ A known issue is that, depending on how new your distributions' packages are, St
 libcurl4 that it packages in with the client, which the loader cannot use. Some distributions may require manually looking for the latest version of this library.
 More detailed instructions on how to do this [can be found here](https://steamcommunity.com/sharedfiles/filedetails/?id=801187233)
 
+You can also try disabling steam-supplied libraries by using the following launch options:
+
+```
+env LD_LIBRARY_PATH="" LD_PRELOAD="$LD_PRELOAD ./libsuperblt_loader.so" %command%
+```
+
 Be sure to install the basemod from [GitLab:znixian/payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua),
 as the automatic installer isn't currently implemented on GNU+Linux.
 

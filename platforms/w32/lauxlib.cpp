@@ -11,7 +11,7 @@ static void tag_error(lua_State *L, int narg, int tag) {
 }
 
 int luaL_argerror(lua_State * L, int narg, const char * extramsg) {
-	return luaL_error(L, "bad argument #%d (%s) in C++ plugin", narg, extramsg);
+	return luaL_error(L, "bad argument #%d (%s)", narg, extramsg);
 }
 
 int luaL_checkoption(lua_State * L, int narg, const char * def, const char * const lst[]) {

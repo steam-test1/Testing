@@ -17,6 +17,7 @@
 #include "scriptdata/ScriptData.h"
 #include "luautil/luautil.h"
 #include "luautil/LuaAssetDb.h"
+#include "luautil/LuaAsyncIO.h"
 #include "dbutil/DB.h"
 
 #include <thread>
@@ -85,6 +86,7 @@ namespace pd2hook
 		}
 	}
 
+	// TODO deduplicate with that in LuaAsyncIO
 	void handled_pcall(lua_State *L, int nargs, int nresults)
 	{
 		int err = lua_pcall(L, nargs, nresults, 0);
@@ -949,6 +951,7 @@ namespace blt
 			load_scriptdata_library(L);
 			load_lua_utils(L);
 			load_lua_asset_db(L);
+			load_lua_async_io(L);
 			pd2hook::tweaker::lua_io::register_lua_functions(L);
 
 			lua_pop(L, 1); // pop the BLT library

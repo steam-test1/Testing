@@ -25,6 +25,12 @@ namespace blt::db
 		int rawLangId;
 		idstring langId;
 
+		/**
+		 * If there are multiple of this kind of asset, but in different languages, then this
+		 * points to another file with the same name/type but a different language.
+		 */
+		DslFile* next = nullptr;
+
 		// These are used for reading, and are picked up from the bundle headers
 		DieselBundle* bundle = nullptr;
 		unsigned int offset = ~0u;

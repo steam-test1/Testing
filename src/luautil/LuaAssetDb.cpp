@@ -17,9 +17,22 @@ using blt::db::DieselBundle;
 using blt::db::DieselDB;
 using blt::db::DslFile;
 
-static idstring to_idstring(lua_State* L, int idx)
+static idstring to_idstring(lua_State* L, int idx, const char* err_name = nullptr)
 {
-	const char* str = luaL_checkstring(L, idx);
+	const char* str;
+	if (err_name)
+	{
+		if (lua_type(L, idx) != LUA_TSTRING)
+		{
+			luaL_error(L, "Invalid type '%s' to SBLT DB function opt '%s' - needed string", lua_typename(L, idx),
+			           err_name);
+		}
+		str = lua_tostring(L, idx);
+	}
+	else
+	{
+		str = luaL_checkstring(L, idx);
+	}
 	int len = strlen(str);
 
 	// If the name is a 17-byte-long string starting with a hash, it's the plain hash
@@ -39,7 +52,17 @@ static DslFile* find_file(lua_State* L)
 {
 	idstring name = to_idstring(L, 1);
 	idstring ext = to_idstring(L, 2);
+
 	// 3rd arg is an options table
+	idstring lang = 0;
+	if (lua_istable(L, 3))
+	{
+		lua_getfield(L, 3, "language");
+		// Use toboolean instead of isnil to supplying false is the same as nil
+		if (lua_toboolean(L, -1))
+			lang = to_idstring(L, -1, "options.language");
+		lua_pop(L, 1);
+	}
 
 	DslFile* file = DieselDB::Instance()->Find(name, ext);
 
@@ -47,12 +70,15 @@ static DslFile* find_file(lua_State* L)
 	if (!file)
 		return nullptr;
 
-	// For now, block files with languages set - we don't know which one we're getting
-	// TODO let the options table specify the required language
-	if (file->langId)
-		return nullptr;
+	// Iterate though the different language versions of this file, until we find the one we need
+	for (DslFile* fi = file; fi; fi = fi->next)
+	{
+		if (fi->langId == lang)
+			return fi;
+	}
 
-	return file;
+	// Can't find anything with the correct language
+	return nullptr;
 }
 
 static int ldb_load(lua_State* L)

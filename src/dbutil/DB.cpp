@@ -171,6 +171,7 @@ DieselDB::DieselDB()
 		if (prev != files.end())
 		{
 			assert(prev->second->langId != fi.langId);
+			fi.next = prev->second;
 		}
 
 		files[fi.Key()] = &fi;

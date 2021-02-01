@@ -233,16 +233,28 @@ else()
 	include(cmake/zlib.cmake)
 	target_link_libraries(SuperBLT zstatic)
 
-	# We need LibPNG for the image support. We have to compile this ourselves so we can
-	# use our built-in copy of zlib.
-	include(cmake/libpng.cmake)
-	target_link_libraries(SuperBLT png_static)
+	option(USE_SYSTEM_LIBRARIES "Use the standard Linux libraries instead of building our own. Can cause linkage issues.")
 
-	# Build our own version of CURL. Using the system version was causing a variety of
-	# issues, ranging from not running inside the steam runtime to crashes from longjmp
-	# caused by a DNS lookup timeout.
-	include(cmake/curl.cmake)
-	target_link_libraries(SuperBLT libcurl)
+	if (USE_SYSTEM_LIBRARIES)
+		find_package(PNG REQUIRED)
+		include_directories(${PNG_INCLUDE_DIRS})
+		target_link_libraries(SuperBLT ${PNG_LIBRARY})
+
+		find_package(CURL REQUIRED)
+		include_directories(${CURL_INCLUDE_DIRS})
+		target_link_libraries(SuperBLT ${CURL_LIBRARY})
+	else ()
+		# We need LibPNG for the image support. We have to compile this ourselves so we can
+		# use our built-in copy of zlib.
+		include(cmake/libpng.cmake)
+		target_link_libraries(SuperBLT png_static)
+
+		# Build our own version of CURL. Using the system version was causing a variety of
+		# issues, ranging from not running inside the steam runtime to crashes from longjmp
+		# caused by a DNS lookup timeout.
+		include(cmake/curl.cmake)
+		target_link_libraries(SuperBLT libcurl)
+	endif ()
 
 	find_package (OpenSSL REQUIRED)
 	include_directories (${OPENSSL_INCLUDE_DIR})

@@ -5,11 +5,16 @@
 #include "LuaAsyncIO.h"
 
 #include <atomic>
+#include <condition_variable>
 #include <fstream>
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <thread>
 #include <utility>
+
+#include <string.h>
+#include <errno.h>
 
 #include <InitState.h>
 #include <threading/queue.h>

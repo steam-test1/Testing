@@ -3,7 +3,6 @@
 #include <util/util.h>
 
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <mutex>
 #include <vector>
@@ -16,7 +15,6 @@
 #include <time.h>
 #endif
 
-namespace fs = std::filesystem;
 using namespace blt::db;
 using blt::idstring;
 
@@ -181,11 +179,8 @@ DieselDB::DieselDB()
 
 	// Load each of the bundle headers
 	std::string suffix = "_h.bundle";
-	for (const fs::directory_entry& entry : fs::directory_iterator("assets"))
+	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
 	{
-		if (!entry.is_regular_file())
-			continue;
-		std::string name = entry.path().filename().string();
 		if (name.compare(name.size() - suffix.size(), suffix.size(), suffix) != 0)
 			continue;
 		if (name == "all_h.bundle")
@@ -196,13 +191,15 @@ DieselDB::DieselDB()
 			continue;
 		}
 
-		// Find the path to the data file - chop out the '_h' bit
-		std::string dataPath = entry.path().string();
+		std::string headerPath = "assets/" + name;
+
+		// Find the headerPath to the data file - chop out the '_h' bit
+		std::string dataPath = headerPath;
 		dataPath.erase(dataPath.end() - 9, dataPath.end() - 7);
 
 		// Memory leak, not an issue since it's a small amount and the DB doesn't get unloaded anyway
-		DieselBundle* bundle = new DieselBundle();
-		bundle->headerPath = entry.path().string();
+		auto* bundle = new DieselBundle();
+		bundle->headerPath = headerPath;
 		bundle->path = dataPath;
 		loadPackageHeader(bundle, filesList);
 	}

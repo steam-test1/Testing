@@ -186,6 +186,7 @@ namespace blt
 
 	static subhook::Hook
 		dslDbAddMembers; // We need this to add the entries, as we need to do it after the DB table is set up
+	static subhook::Hook dslMainDbScriptHas;
 
 	static void (*dsl_db_add_members)(lua_state*);
 	static void (*dsl_fss_open)(Archive* output, FileSystemStack** _this, libcxxstring const*);
@@ -196,6 +197,11 @@ namespace blt
 	typedef void* (*try_open_t)(Archive* target, DB* db, idstring_cls* ext, idstring_cls* name,
 	                            void* template_obj /* Misc depends on the template type */, Transport* transport);
 	typedef void* (*do_resolve_t)(DB* _this, idstring_cls*, idstring_cls*, void* template_obj, void* unknown);
+
+	static void (*maindb_parse_args)(ResourceID* out, uint64_t ukn_pad, lua_State* LuaArg_1_state, int LuaArg_1_pos,
+	                                 lua_State* LuaArg_2, int LuaArg_2_pos);
+	static bool (*maindb_script_has)(void* this_, lua_State* LuaArg_1_state, int LuaArg_1_id, lua_State* LuaArg_2_state,
+	                                 int LuaArg_2_id);
 
 	// Create variables for each of the functions
 	// A detour, and a pointer to the correspoinding try_open and do_resolve functions
@@ -257,7 +263,7 @@ namespace blt
 			}
 			default:
 				string msg = "Unknown asset typecode " + to_string(type) +
-							 " - this is probably a bug in SuperBLT, please report it";
+				             " - this is probably a bug in SuperBLT, please report it";
 				throw msg;
 			}
 
@@ -369,6 +375,23 @@ namespace blt
 		dsl_db_add_members(L);
 	}
 
+	// Override the Lua DB:has function, since stuff breaks if the assets they add don't appear to be available.
+	// See issue 60: https://gitlab.com/znixian/payday2-superblt/-/issues/60
+	bool dt_maindb_script_has(void* this_, lua_State* LuaArg_1_state, int LuaArg_1_id, lua_State* LuaArg_2_state,
+	                          int LuaArg_2_id)
+	{
+		hook_remove(dslMainDbScriptHas);
+
+		ResourceID id = {};
+		maindb_parse_args(&id, 0, LuaArg_1_state, LuaArg_1_id, LuaArg_2_state, LuaArg_2_id);
+		hash_t hash(id.name, id.type);
+
+		if (custom_assets.count(hash))
+			return true;
+
+		return maindb_script_has(this_, LuaArg_1_state, LuaArg_1_id, LuaArg_2_state, LuaArg_2_id);
+	}
+
 	// Initialiser function, called by hook.cc
 	void init_asset_hook(void* dlHandle)
 	{
@@ -407,6 +430,10 @@ namespace blt
 		setcall(dsl_fss_open,
 		        _ZNK3dsl15FileSystemStack4openERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE);
 
+		// The DB:has function, so that newly created assets return true in it.
+		setcall(maindb_parse_args, _ZN3dsl6MainDB10parse_argsENS_6LuaArgES1_);
+		setcall(maindb_script_has, _ZN3dsl6MainDB10script_hasENS_6LuaArgES1_);
+
 		// The archive constructor
 		setcall(
 			archive_ctor,
@@ -421,6 +448,10 @@ namespace blt
 		// Add the 'add_members' hook
 		dslDbAddMembers.Install((void*)dsl_db_add_members, (void*)dt_dsl_db_add_members,
 		                        subhook::HookOption64BitOffset);
+
+		// Add the 'script_has' hook
+		dslMainDbScriptHas.Install((void*)maindb_script_has, (void*)dt_maindb_script_has,
+		                           subhook::HookOption64BitOffset);
 
 		// Hook each of the four loading functions
 #define INSTALL_TRY_OPEN_HOOK(id)                                                                    \

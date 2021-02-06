@@ -13,8 +13,8 @@
 #include <thread>
 #include <utility>
 
-#include <string.h>
 #include <errno.h>
+#include <string.h>
 
 #include <InitState.h>
 #include <threading/queue.h>
@@ -172,11 +172,12 @@ static int aio_read(lua_State* L)
 			success = false;
 		}
 
-		invoke_on_update(L, [L, func_ref{completion_func_ref}, data, success, err{errno}]() {
+		invoke_on_update(L, [L, func_ref{completion_func_ref}, &data, success, err{errno}]() {
 			lua_rawgeti(L, LUA_REGISTRYINDEX, func_ref);
 			if (success)
 			{
 				lua_pushlstring(L, data.data(), data.size());
+				data.clear();
 				handled_pcall(L, 1, 0);
 			}
 			else

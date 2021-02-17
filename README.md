@@ -52,7 +52,7 @@ Documentation for SuperBLT can be found on the [SuperBLT Website](https://superb
 	* Kilandor
 	* Joel Juvél
 	* Brskt
-	* Dribbleondo
+	* [Dribbleondo](http://twitter.com/dribbleondo)
 	* zekesonxx
 	* TRSGuy
 	* luck3y
@@ -109,7 +109,7 @@ sure to install their development headers too. This can be done via your package
 These packages are normally as follows: `libcurl4-openssl-dev`, `libssl-dev`, 
 `zlib1g-dev`, and `libopenal-dev`. This is distribution-dependant, naturally.
 
-Next, compile the loader. You can speed up the compile process by replacing the number
+Next, compile the loader. You can speed up the compilation process by replacing the number
 "4" with the amount of threads your CPU has (generally it's twice the core count, so
 for example: 2 cores will have 4 threads, 4 cores will have 8 threads, and so on):
 
@@ -127,10 +127,6 @@ env LD_PRELOAD="$LD_PRELOAD ./libsuperblt_loader.so" %command%
 ```
 
 This environment variable will tell the game to look for the SuperBLT loader when you run PAYDAY 2.
-
-A known issue is that, depending on how new your distributions' packages are, Steam has an annoying tendancy to use an outdated version of
-libcurl4 that it packages in with the client, which the loader cannot use. Some distributions may require manually looking for the latest version of this library.
-More detailed instructions on how to do this [can be found here](https://steamcommunity.com/sharedfiles/filedetails/?id=801187233)
 
 Be sure to install the basemod from [GitLab:znixian/payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua),
 as the automatic installer isn't currently implemented on GNU+Linux.

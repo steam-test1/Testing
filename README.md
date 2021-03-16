@@ -78,6 +78,9 @@ so you don't need to make any special efforts to use them.
 
 ### GNU+Linux
 
+If you are using SELinux, you may require running either `sudo setsebool -P selinuxuser_execheap 1` or `sudo setenforce 0` before
+doing anything. This allows the loader to adjust the memory of the PAYDAY 2 executable.
+
 First, clone this repository:
 
 ```
@@ -106,7 +109,7 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 If the previous step told you that you're missing some libraries (which is quite likely), install them, and be
 sure to install their development headers too. This can be done via your package manager.
 
-These packages are normally as follows: `libcurl4-openssl-dev`, `libssl-dev`, 
+These packages are normally as follows: `libcurl4-openssl-dev`, `libpng-dev`, `libssl-dev`, 
 `zlib1g-dev`, and `libopenal-dev`. This is distribution-dependant, naturally.
 
 Next, compile the loader. You can speed up the compilation process by replacing the number

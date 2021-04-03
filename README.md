@@ -81,7 +81,7 @@ so you don't need to make any special efforts to use them.
 If you are using SELinux, you may require running either `sudo setsebool -P selinuxuser_execheap 1` or `sudo setenforce 0` before
 doing anything. This allows the loader to adjust the memory of the PAYDAY 2 executable.
 
-First, clone this repository:
+First, clone this repository, and pull all required projects and repositories into one folder (Note: You **NEED** to do this, otherwise you'll get runtime and compile errors):
 
 ```
 git clone --recursive https://gitlab.com/znixian/payday2-superblt.git

@@ -199,7 +199,17 @@ static blt::idstring parseHash(std::string value)
 	if (value.size() == 17 && value.at(0) == '@')
 	{
 		char* endPtr = nullptr;
-		blt::idstring id = strtoll(value.c_str() + 1, &endPtr, 16);
+		errno = 0;
+		blt::idstring id = strtoull(value.c_str() + 1, &endPtr, 16);
+		if (errno)
+		{
+			char buff[1024];
+			memset(buff, 0, sizeof(buff));
+			snprintf(buff, sizeof(buff) - 1, "[wren] Invalid hash value '%s': Parse errno %d %s", value.c_str(), errno,
+			         strerror(errno));
+			PD2HOOK_LOG_ERROR(buff);
+			abort();
+		}
 		if (endPtr != value.c_str() + 17)
 		{
 			char buff[1024];

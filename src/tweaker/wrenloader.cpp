@@ -135,6 +135,18 @@ static void internal_set_tweaker_enabled(WrenVM* vm)
 	pd2hook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
 }
 
+static void internal_warn_bad_mod(WrenVM* vm)
+{
+	std::string file = wrenGetSlotString(vm, 1);
+	std::string err = wrenGetSlotString(vm, 2);
+	std::string message = "Failed to load Wren mod file '" + file + "': '" + err + "'";
+#ifdef _WIN32
+	MessageBoxA(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
+#else
+	puts(message.c_str());
+#endif
+}
+
 static WrenForeignClassMethods bindForeignClass(WrenVM* vm, const char* module, const char* class_name)
 {
 	WrenForeignClassMethods methods = wrenxml::get_XML_class_def(vm, module, class_name);
@@ -207,6 +219,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 			if (isStatic && strcmp(signature, "tweaker_enabled=(_)") == 0)
 			{
 				return &internal_set_tweaker_enabled;
+			}
+			else if (isStatic && strcmp(signature, "warn_bad_mod(_,_)") == 0)
+			{
+				return &internal_warn_bad_mod;
 			}
 		}
 	}

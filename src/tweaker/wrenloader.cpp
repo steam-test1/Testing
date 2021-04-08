@@ -178,10 +178,13 @@ static void internal_warn_bad_mod(WrenVM* vm)
 	std::string file = wrenGetSlotString(vm, 1);
 	std::string err = wrenGetSlotString(vm, 2);
 	std::string message = "Failed to load Wren mod file '" + file + "': '" + err + "'";
+
+	// Always log, even on Windows, so a mod author can track it down if the user doesn't mention
+	// it in a bug report for whatever reason.
+	PD2HOOK_LOG_ERROR(message.c_str());
+
 #ifdef _WIN32
 	MessageBoxA(0, message.c_str(), "SuperBLT: Failed to load Wren mod", MB_OK);
-#else
-	puts(message.c_str());
 #endif
 }
 

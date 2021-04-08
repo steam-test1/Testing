@@ -110,7 +110,7 @@ If the previous step told you that you're missing some libraries (which is quite
 sure to install their development headers too. This can be done via your package manager.
 
 These packages are normally as follows: `libcurl4-openssl-dev`, `libpng-dev`, `libssl-dev`, 
-`zlib1g-dev`, and `libopenal-dev`. This is distribution-dependant, naturally.
+`zlib-dev` (often called `zlib1g-dev` in debian distro's), and `libopenal-dev`. This is distribution-dependant, naturally, and may also require installing the non-dev-header packages too (`libpng-dev` and `libpng` for example).
 
 Next, compile the loader. You can speed up the compilation process by replacing the number
 "4" with the amount of threads your CPU has (generally it's twice the core count, so

@@ -26,6 +26,13 @@ using namespace pd2hook;
 using namespace pd2hook::tweaker;
 using namespace std;
 
+struct ModData
+{
+	std::string name;
+	std::string scripts_root;
+};
+std::map<std::string, ModData> mod_metadata;
+
 static void err([[maybe_unused]] WrenVM* vm, [[maybe_unused]] WrenErrorType type, const char* module, int line,
                 const char* message)
 {
@@ -135,6 +142,37 @@ static void internal_set_tweaker_enabled(WrenVM* vm)
 	pd2hook::tweaker::tweaker_enabled = wrenGetSlotBool(vm, 1);
 }
 
+static void internal_register_mod_v1(WrenVM* vm)
+{
+	int slotType;
+
+	if ((slotType = wrenGetSlotType(vm, 1)) != WREN_TYPE_STRING)
+	{
+		char str[64];
+		memset(str, 0, sizeof(str));
+		snprintf(str, sizeof(str) - 1, "Invalid mod data: name is non-string type %d", slotType);
+		wrenSetSlotString(vm, 0, str);
+		wrenAbortFiber(vm, 0);
+		return;
+	}
+
+	if ((slotType = wrenGetSlotType(vm, 2)) != WREN_TYPE_STRING)
+	{
+		char str[64];
+		memset(str, 0, sizeof(str));
+		snprintf(str, sizeof(str) - 1, "Invalid mod data: scripts_root is non-string type %d", slotType);
+		wrenSetSlotString(vm, 0, str);
+		wrenAbortFiber(vm, 0);
+		return;
+	}
+
+	std::string name = wrenGetSlotString(vm, 1);
+	ModData data = {};
+	data.name = name;
+	data.scripts_root = wrenGetSlotString(vm, 2);
+	mod_metadata[name] = std::move(data); // Can't use data.name as the index value, the order is undefined
+}
+
 static void internal_warn_bad_mod(WrenVM* vm)
 {
 	std::string file = wrenGetSlotString(vm, 1);
@@ -223,6 +261,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 			else if (isStatic && strcmp(signature, "warn_bad_mod(_,_)") == 0)
 			{
 				return &internal_warn_bad_mod;
+			}
+			else if (isStatic && strcmp(signature, "register_mod_v1(_,_)") == 0)
+			{
+				return &internal_register_mod_v1;
 			}
 		}
 	}
@@ -362,7 +404,15 @@ static WrenLoadModuleResult getModulePath([[maybe_unused]] WrenVM* vm, const cha
 	string mod = name.substr(0, name.find_first_of('/'));
 	string file = name.substr(name.find_first_of('/') + 1);
 
-	ifstream handle("mods/" + mod + "/wren/" + file + ".wren");
+	// Use the metadata to find where the Wren files are
+	const auto& meta_pair = mod_metadata.find(mod);
+	std::string scripts_root = "wren";
+	if (meta_pair != mod_metadata.end())
+	{
+		scripts_root = meta_pair->second.scripts_root;
+	}
+
+	ifstream handle("mods/" + mod + "/" + scripts_root + "/" + file + ".wren");
 	if (!handle.good())
 	{
 		WrenLoadModuleResult result{};

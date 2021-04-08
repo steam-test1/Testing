@@ -2,6 +2,7 @@
 
 class Internal {
     foreign static tweaker_enabled=(value) // Disable the tweaker if the basemod is using the DB hook system instead
+    foreign static register_mod_v1(name, scripts_path) // Register metadata about a given mod
 
     // Show a UI to warn that a mod failed to load
     // This is intentionally restrictive to avoid abuse to show random popups, which

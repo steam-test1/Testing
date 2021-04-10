@@ -201,6 +201,9 @@ static int wren_lua_invoke(lua_State* L)
 		auto lock = pd2hook::wren::lock_wren_vm();
 		WrenVM* vm = pd2hook::wren::get_wren_vm();
 
+		if (!vm)
+			luaL_error(L, "Wren runtime unavailable - check for Wren-related errors in the log");
+
 		WrenHandle* res = wrenMakeCallHandle(vm, func_name.c_str());
 
 		wrenEnsureSlots(vm, 1 + arg_count);

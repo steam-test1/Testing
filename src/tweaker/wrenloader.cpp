@@ -473,7 +473,10 @@ WrenVM* pd2hook::wren::get_wren_vm()
 			// If the main file doesn't exist, do nothing
 			Util::FileType ftyp = Util::GetFileType("mods/base/wren/base.wren");
 			if (ftyp == Util::FileType_None)
+			{
+				PD2HOOK_LOG_WARN("Wren base file not found, Wren VM disabled - the basemod may be corrupted");
 				available = false;
+			}
 		}
 
 		if (!available)
@@ -509,6 +512,10 @@ const char* tweaker::transform_file(const char* text)
 {
 	auto lock = pd2hook::wren::lock_wren_vm();
 	WrenVM* vm = pd2hook::wren::get_wren_vm();
+
+	// If the Wren runtime is unavailable, obviously we can't apply any tweaks
+	if (!vm)
+		return text;
 
 	wrenEnsureSlots(vm, 4);
 

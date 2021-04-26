@@ -156,8 +156,14 @@ namespace pd2hook
 
 		// Close the OpenAL context/device
 		alcMakeContextCurrent(NULL);
-		alcDestroyContext(ctx);
-		alcCloseDevice(dev);
+
+		// HACK it seems PD2 will happily kill off the OpenAL thread, along with all the
+		// others when it's exiting. Calling alcDestroyContext will post a message to this
+		// now-dead thread and wait forever for a message to come back.
+		// Thus don't stop OpenAL.
+		// See https://gitlab.com/znixian/payday2-superblt/-/issues/72
+		// alcDestroyContext(ctx);
+		// alcCloseDevice(dev);
 	}
 
 	XAudio* XAudio::GetXAudioInstance()

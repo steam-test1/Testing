@@ -174,7 +174,7 @@ WrenForeignClassMethods pd2hook::tweaker::dbhook::bind_dbhook_class([[maybe_unus
 	// Since we're using our own factory methods, this should never be called
 	WrenForeignMethodFn fakeAllocate = [](WrenVM* vm) { abort(); };
 
-	if (!strcmp(module, "base/native"))
+	if (!strcmp(module, MODULE))
 	{
 		if (!strcmp(class_name, "DBAssetHook"))
 		{

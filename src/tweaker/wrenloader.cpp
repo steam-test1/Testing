@@ -371,6 +371,10 @@ const char* resolveModule(WrenVM* vm, const char* importer, const char* name)
 		if (strcmp(name, "base/native") == 0 || strncmp(name, "base/native/", 12) == 0)
 			return name;
 
+		// Also permit base/api/* which is where APIs exported by the basemod go
+		if (strncmp(name, "base/api/", 9) == 0)
+			return name;
+
 		// So since it's not one of the above, make sure this is coming from the base module
 		if (strncmp(importer, "base/", 5) == 0)
 			return name;

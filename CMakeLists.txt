@@ -86,6 +86,7 @@ set(wren_src_files
 	wren/internal_001.wren
 	wren/LuaInterface_001.wren
 	wren/Environment_001.wren
+	wren/Utils_001.wren
 	)
 add_custom_command(
 	OUTPUT wren_generated_src.c gen/wren_generated_src.h

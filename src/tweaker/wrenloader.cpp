@@ -10,6 +10,7 @@
 #include "util/util.h"
 #include "wren_environment.h"
 #include "wren_lua_interface.h"
+#include "wren_sblt_utils.h"
 #include "wrenxml.h"
 #include "xmltweaker_internal.h"
 
@@ -218,6 +219,10 @@ static WrenForeignMethodFn bindForeignMethod(WrenVM* vm, const char* module, con
 	WrenForeignMethodFn env_method = wren_env::bind_wren_env_method(vm, module, className, isStatic, signature);
 	if (env_method)
 		return env_method;
+
+	WrenForeignMethodFn util_method = wren_utils::bind_wren_utils_method(vm, module, className, isStatic, signature);
+	if (util_method)
+		return util_method;
 
 	if (strcmp(module, "base/native") == 0)
 	{

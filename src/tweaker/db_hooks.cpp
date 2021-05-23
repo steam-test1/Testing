@@ -293,11 +293,9 @@ static void wrenLoadAssetContents(WrenVM* vm)
 	{
 		stream.exceptions(std::ios::failbit | std::ios::eofbit);
 
-		std::vector<char> data(file->length);
-		stream.seekg(file->offset, std::ios::beg);
-		stream.read(data.data(), data.size());
+		std::vector<uint8_t> data = file->ReadContents(stream);
 
-		wrenSetSlotBytes(vm, 0, data.data(), data.size());
+		wrenSetSlotBytes(vm, 0, (const char*)data.data(), data.size());
 	}
 	catch (const std::ios::failure& ex)
 	{
@@ -388,9 +386,15 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 #endif
 		}
 
-		*out_datastore = DieselDB::Instance()->Open(file->bundle);
+		BLTAbstractDataStore* ds = DieselDB::Instance()->Open(file->bundle);
+		*out_datastore = ds;
 		*out_pos = file->offset;
-		*out_len = file->length;
+
+		// If this is an end-of-file asset we have to find it's length
+		if (file->HasLength())
+			*out_len = file->length;
+		else
+			*out_len = ds->size() - file->offset;
 	};
 
 	if (target.plain_file)

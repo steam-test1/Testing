@@ -118,11 +118,8 @@ static int ldb_load(lua_State* L)
 		fi.exceptions(std::ios::failbit);
 		fi.open(file->bundle->path, std::ios::binary);
 
-		fi.seekg(file->offset);
-
-		std::vector<char> data(file->length);
-		fi.read(data.data(), data.size());
-		lua_pushlstring(L, data.data(), data.size());
+		std::vector<uint8_t> data = file->ReadContents(fi);
+		lua_pushlstring(L, (const char*)data.data(), data.size());
 		return 1;
 	}
 	catch (const std::ios::failure& ex)

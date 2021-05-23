@@ -3,6 +3,7 @@
 #include "Datastore.h"
 #include "platform.h"
 
+#include <istream>
 #include <map>
 #include <vector>
 
@@ -36,20 +37,22 @@ namespace blt::db
 		unsigned int offset = ~0u;
 		unsigned int length = ~0u;
 
-		bool Found() const
+		[[nodiscard]] bool Found() const
 		{
 			return bundle != nullptr;
 		}
 
-		bool HasLength() const
+		[[nodiscard]] bool HasLength() const
 		{
 			return length != ~0u;
 		}
 
-		std::pair<idstring, idstring> Key() const
+		[[nodiscard]] std::pair<idstring, idstring> Key() const
 		{
 			return std::pair<idstring, idstring>(name, type);
 		}
+
+		[[nodiscard]] std::vector<uint8_t> ReadContents(std::istream& fi) const;
 	};
 
 	class DieselDB

@@ -97,6 +97,30 @@ DieselDB* DieselDB::Instance()
 static void loadPackageHeader(DieselBundle* bundle, FileList);
 static void loadBundleHeader(std::string filename, FileList);
 
+////////////////////////
+////// DSL FILE ////////
+////////////////////////
+
+std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
+{
+	unsigned int realLength = length;
+	if (!HasLength())
+	{
+		// This is an end-of-file asset, so it's length is it's start until the end of the file
+		fi.seekg(0, std::ios::end);
+		realLength = fi.tellg() - (ssize_t)offset;
+	}
+
+	std::vector<uint8_t> data(realLength);
+	fi.seekg(offset);
+	fi.read((char*)data.data(), data.size());
+	return data;
+}
+
+////////////////////////
+////// DIESEL DB ///////
+////////////////////////
+
 DieselDB::DieselDB()
 {
 	uint64_t start_time = monotonicTimeMicros();

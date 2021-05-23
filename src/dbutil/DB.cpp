@@ -108,7 +108,7 @@ std::vector<uint8_t> DslFile::ReadContents(std::istream& fi) const
 	{
 		// This is an end-of-file asset, so it's length is it's start until the end of the file
 		fi.seekg(0, std::ios::end);
-		realLength = fi.tellg() - (ssize_t)offset;
+		realLength = (unsigned int)fi.tellg() - offset;
 	}
 
 	std::vector<uint8_t> data(realLength);

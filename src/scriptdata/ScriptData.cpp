@@ -365,7 +365,7 @@ namespace pd2hook::scriptdata
 			}
 
 			// TODO linkages
-			for(const linkage ln : linkages)
+			for(const linkage& ln : linkages)
 			{
 				ln.on_address_set(ln.block->offset);
 			}

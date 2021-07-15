@@ -205,6 +205,8 @@ DieselDB::DieselDB()
 	std::string suffix = "_h.bundle";
 	for (const std::string& name : pd2hook::Util::GetDirectoryContents("assets"))
 	{
+		if (name.length() <= suffix.size())
+			continue;
 		if (name.compare(name.size() - suffix.size(), suffix.size(), suffix) != 0)
 			continue;
 		if (name == "all_h.bundle")

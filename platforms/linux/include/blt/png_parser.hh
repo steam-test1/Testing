@@ -6,6 +6,6 @@
 
 namespace blt
 {
-	void init_png_parser(void *dlHandle);
+	void init_png_parser();
     void install_png_parser();
 }

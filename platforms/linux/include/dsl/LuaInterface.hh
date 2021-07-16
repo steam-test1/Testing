@@ -1,5 +1,6 @@
 #pragma once
 
+#include "blt/elf_utils.hh"
 #include <lua.hh>
 
 namespace dsl
@@ -18,6 +19,24 @@ namespace dsl
 		lua_state* state;
 
 		// typedef void* (*Allocation)(void*, void*, unsigned long, unsigned long);
-		void* newstate(bool, bool, Allocation);
+		void* newstate(bool a, bool b, Allocation c)
+		{
+			using FuncType = void* (*)(LuaInterface*, bool, bool, Allocation);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZN3dsl12LuaInterface8newstateEbbNS0_10AllocationE"));
+
+			// void* ret;
+			// asm(
+					// "mov %0, %%rdi;"
+					// "mov %1, %%sil;"
+					// // "mov %2, %%edx;"
+					// // "mov %3, %%ecx;"
+					// : "=r" (ret)
+					// : "r" (this), "r" (a), "r" (b), "r" (c)
+			   // );
+
+			// return ret;
+
+			return realCall(this, a, b, c);
+		}
 	};
 }

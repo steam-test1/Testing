@@ -4,6 +4,7 @@
 
 #include "blt/png_parser.hh"
 
+#include "blt/elf_utils.hh"
 #include "blt/libcxxstring.hh"
 
 #include "dsl/Archive.hh"
@@ -198,14 +199,14 @@ void blt::install_png_parser()
 	register_parser(libcxxstring("png"), PNGParser::can_parse_png, PNGParser::create_parser);
 }
 
-void blt::init_png_parser(void* dlHandle)
+void blt::init_png_parser()
 {
 	const char* sig = "_ZN3dsl18GeneralImageParser15register_parserERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_"
 					  "9allocatorIcEEEEPFbRNS_7ArchiveEEPFPNS_11ImageParserEvE";
 
-	register_parser = (register_parser_t)dlsym(dlHandle, sig);
+	register_parser = (register_parser_t)blt::elf_utils::find_sym(sig);
 
 	const char* archive_sig =
 		"_ZN3dsl7ArchiveC1ERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEPNS_9DataStoreExxbx";
-	archive_ctor = (archive_ctor_t)dlsym(dlHandle, archive_sig);
+	archive_ctor = (archive_ctor_t)blt::elf_utils::find_sym(archive_sig);
 }

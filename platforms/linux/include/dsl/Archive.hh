@@ -1,6 +1,7 @@
 #pragma once
 
 #include <blt/libcxxstring.hh>
+#include <blt/elf_utils.hh>
 
 namespace dsl
 {
@@ -12,7 +13,13 @@ namespace dsl
 		Archive(std::string const&, dsl::DataStore*, uint64_t, uint64_t, bool, uint64_t);
 		Archive(dsl::Archive const&, uint64_t, uint64_t, bool, uint64_t const&);
 		Archive(dsl::Archive const&);
-		~Archive();
+		~Archive()
+		{
+			using FuncType = void (*)(Archive*);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZN3dsl7ArchiveD1Ev"));
+
+			realCall(this);
+		}
 
 		Archive &operator=(dsl::Archive const&);
 

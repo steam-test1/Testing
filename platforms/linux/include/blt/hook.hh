@@ -20,7 +20,7 @@ namespace blt
 {
 
 	bool check_active_state(lua_state*);
-	void blt_init_hooks(void*);
+	void blt_init_hooks();
 
 }
 #endif //_HOOK_H

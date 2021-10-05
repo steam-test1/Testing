@@ -18,7 +18,14 @@ namespace dsl
 
 		// void set_position(long long, dsl::Archive::SeekMethod);
 		void _chk_decompress();
-		void checked_read_raw(unsigned char*, unsigned long);
+				void checked_read_raw(unsigned char* a, unsigned long b)
+		{
+
+			using FuncType = void (*)(Archive*, unsigned char*, unsigned long);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZN3dsl7Archive16checked_read_rawEPhm"));
+
+			realCall(this, a, b);
+		}
 		void checked_write_raw(unsigned char const*, unsigned long);
 		void read_ln(std::string*);
 		void read_str(std::string*);

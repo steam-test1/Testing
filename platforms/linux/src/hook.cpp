@@ -175,7 +175,7 @@ namespace blt
 
 		// First thing to do, install error handlers so if we crash we can generate a nice stacktrace
 		log::log("Installing SuperBLT error handlers", log::LOG_INFO);
-		// error::set_global_handlers();
+	error::set_global_handlers();
 
 #define setcall(symbol,ptr) *(void**)(&ptr) = blt::elf_utils::find_sym(#symbol); \
 		if (ptr == nullptr) { PD2HOOK_LOG_LOG(#ptr " was null"); abort(); }

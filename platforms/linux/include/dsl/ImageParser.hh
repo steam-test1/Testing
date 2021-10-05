@@ -26,8 +26,8 @@ namespace dsl
 
 		virtual void dtor_thing_a() = 0;
 		virtual void dtor_thing_b() = 0;
-		virtual bool is_type(unsigned int) const;
-		virtual unsigned int type_id() const;
+		//virtual bool is_type(unsigned int) const;
+		//virtual unsigned int type_id() const;
 		virtual void open() = 0;
 		virtual void close() = 0;
 		virtual bool dynamic() const = 0;

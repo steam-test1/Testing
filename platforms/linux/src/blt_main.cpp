@@ -11,6 +11,7 @@ extern "C" {
 }
 #include <iostream>
 #include "blt/hook.hh"
+#include "blt/elf_utils.hh"
 
 using std::cerr;
 
@@ -38,6 +39,7 @@ blt_main ()
 {
 	void* dlHandle = dlopen(NULL, RTLD_LAZY);
 	cerr << "dlHandle = " << dlHandle << "\n";
+	blt::elf_utils::init();
 
 	/*
 	 * Hack: test for presence of a known unique function amongst the libraries loaded by payday
@@ -45,14 +47,13 @@ blt_main ()
 	 *
 	 * lua_call will do just fine in this case, as it's only present in payday
 	 */
-	if (dlHandle && dlsym(dlHandle, "_ZN3dsl12LuaInterface8newstateEbbNS0_10AllocationE"))
+	if (blt::elf_utils::find_sym("_ZN3dsl12LuaInterface8newstateEbbNS0_10AllocationE"))
 	{
-		blt::blt_init_hooks(dlHandle);
+		blt::blt_init_hooks();
 	}
-	else if(dlHandle)
+	else
 	{
-		cerr << "lua_call wasn't found in dlHandle, won't load!\n";
-		dlclose(dlHandle);
+        cerr << "_ZN3dsl12LuaInterface8newstateEbbNS0_10AllocationE wasn't found, won't load!\n";
 	}
 }
 

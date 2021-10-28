@@ -1,4 +1,5 @@
 #include <blt/assets.hh>
+#include <blt/elf_utils.hh>
 #include <blt/libcxxstring.hh>
 #include <blt/log.hh>
 
@@ -393,9 +394,9 @@ namespace blt
 	}
 
 	// Initialiser function, called by hook.cc
-	void init_asset_hook(void* dlHandle)
+	void init_asset_hook()
 	{
-#define setcall(ptr, symbol) *(void**)(&ptr) = dlsym(dlHandle, #symbol);
+#define setcall(ptr, symbol) *(void**)(&ptr) = blt::elf_utils::find_sym(#symbol);
 
 		// Get the try_open functions
 		setcall(

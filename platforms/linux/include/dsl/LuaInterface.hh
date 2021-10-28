@@ -18,6 +18,12 @@ namespace dsl
 		lua_state* state;
 
 		// typedef void* (*Allocation)(void*, void*, unsigned long, unsigned long);
-		void* newstate(bool, bool, Allocation);
+		void* newstate(bool a, bool b, Allocation c)
+		{
+			using FuncType = void* (*)(LuaInterface*, bool, bool, Allocation);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZN3dsl12LuaInterface8newstateEbbNS0_10AllocationE"));
+
+			return realCall(this, a, b, c);
+		}
 	};
 }

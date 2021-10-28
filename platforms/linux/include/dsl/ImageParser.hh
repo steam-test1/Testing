@@ -26,8 +26,22 @@ namespace dsl
 
 		virtual void dtor_thing_a() = 0;
 		virtual void dtor_thing_b() = 0;
-		virtual bool is_type(unsigned int) const;
-		virtual unsigned int type_id() const;
+		virtual bool is_type(unsigned int a) const
+		{
+			using FuncType = bool (*)(const ImageParser*, unsigned int);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZNK3dsl11ImageParser7is_typeEj"));
+
+			return realCall(this, a);
+		}
+
+		virtual unsigned int type_id() const
+		{
+			using FuncType = unsigned int (*)(const ImageParser*);
+			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZNK3dsl11ImageParser7type_idEv"));
+
+			return realCall(this);
+		}
+
 		virtual void open() = 0;
 		virtual void close() = 0;
 		virtual bool dynamic() const = 0;

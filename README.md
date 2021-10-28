@@ -11,8 +11,7 @@ The Lua component of the BLT which controls mod loading can be found in it's own
 ## Download
 Visit [The SuperBLT Site](https://superblt.znix.xyz/) to get the latest stable download for Windows. 
 Dribbleondo maintains a Linux download that is primarily for Debian-based Distro's, 
-which [can be accessed here](https://drive.google.com/open?id=1qcZ3-FFTbmI075pzNyY2h_XtRdnnTTDl). See below for building
-GNU+Linux binaries for yourself if you have no success with any other option.
+which [can be accessed here](https://drive.google.com/open?id=1qcZ3-FFTbmI075pzNyY2h_XtRdnnTTDl), with the only pre-requisite package needing to be installed is `libssl-dev`. See below for building GNU+Linux binaries for yourself if you have no success with any other option.
 
 ## Documentation
 Documentation for the BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.

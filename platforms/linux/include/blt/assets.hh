@@ -4,7 +4,7 @@
 
 namespace blt
 {
-	void init_asset_hook(void *dlHandle);
+	void init_asset_hook();
 	void asset_add_lua_members(lua_State *L);
 };
 

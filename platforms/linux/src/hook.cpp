@@ -1,4 +1,6 @@
 // TODO split this out or something idk
+#include "blt/elf_utils.hh"
+
 extern "C" {
 #include <dlfcn.h>
 #include <dirent.h>
@@ -166,16 +168,18 @@ namespace blt
 	}
 
 	void
-	blt_init_hooks(void* dlHandle)
+	blt_init_hooks()
 	{
 		// Load this first, so if something goes wrong we don't have to wait for the game to start
 		blt::db::DieselDB::Instance();
 
 		// First thing to do, install error handlers so if we crash we can generate a nice stacktrace
 		log::log("Installing SuperBLT error handlers", log::LOG_INFO);
-		error::set_global_handlers();
+	error::set_global_handlers();
 
-#define setcall(symbol,ptr) *(void**) (&ptr) = dlsym(dlHandle, #symbol);
+#define setcall(symbol,ptr) *(void**)(&ptr) = blt::elf_utils::find_sym(#symbol); \
+		if (ptr == nullptr) { PD2HOOK_LOG_LOG(#ptr " was null"); abort(); }
+
 		log::log("finding lua functions", log::LOG_INFO);
 
 		/*
@@ -196,8 +200,9 @@ namespace blt
 		}
 
 		// Grab the IDstring things
-		platform::last_loaded_name = (idstring*) dlsym(dlHandle, "_ZN3dsl14LoadingTracker8_db_nameE");
-		platform::last_loaded_ext  = (idstring*) dlsym(dlHandle, "_ZN3dsl14LoadingTracker8_db_typeE");
+		platform::last_loaded_name = (idstring*) blt::elf_utils::find_sym("_ZN3dsl14LoadingTracker8_db_nameE");
+		platform::last_loaded_ext  = (idstring*) blt::elf_utils::find_sym("_ZN3dsl14LoadingTracker8_db_typeE");
+
 
 		PD2HOOK_LOG_LOG("installing hooks");
 
@@ -214,8 +219,8 @@ namespace blt
 			nodeFromXMLDetour.Install   ((void*) node_from_xml,                 (void*) dt_node_from_xml, HookOption64BitOffset);
 		}
 
-		init_asset_hook(dlHandle);
-		init_png_parser(dlHandle);
+		init_asset_hook();
+		init_png_parser();
 
 		pd2hook::InitiateStates(); // TODO move this into the blt namespace
 #undef setcall

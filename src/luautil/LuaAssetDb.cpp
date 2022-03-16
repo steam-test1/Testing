@@ -35,14 +35,26 @@ static idstring to_idstring(lua_State* L, int idx, const char* err_name = nullpt
 	}
 	int len = strlen(str);
 
-	// If the name is a 17-byte-long string starting with a hash, it's the plain hash
-	if (len == 17 && str[0] == '#')
+	// If the name is a 17 or 18-byte-long string starting with a hash, it's the plain hash
+	if (str[0] == '#' && (len == 17 || (len == 18 && str[17] == '!')))
 	{
 		char* end_ptr;
-		idstring value = strtoll(str, &end_ptr, 16);
-		if (*end_ptr)
+		idstring value = strtoull(str + 1, &end_ptr, 16);
+		if (*end_ptr && end_ptr - str != 17)
 			luaL_error(L, "Failed to parse raw idstring '%s': parsing stopped at '%s'", str, end_ptr);
-		return value;
+		// If string len is 17, we're done
+		if (len == 17)
+		{
+			return value;
+		}
+
+		// Otherwise, the last character is an exclamation mark so swap endianness
+		idstring endian_swapped = 0;
+		for (unsigned i = 0; i < sizeof(idstring); i++)
+		{
+			endian_swapped |= ((value >> (i * 8)) & 0xFF) << ((sizeof(idstring) - 1 - i) * 8);
+		}
+		return endian_swapped;
 	}
 
 	return blt::idstring_hash(str);

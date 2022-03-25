@@ -11,7 +11,7 @@ The Lua component of the BLT which controls mod loading can be found in it's own
 ## Download
 Visit [The SuperBLT Site](https://superblt.znix.xyz/) to get the latest stable download for Windows. 
 Dribbleondo maintains a Linux download that is primarily for Debian-based Distro's, 
-which [can be accessed here](https://drive.google.com/open?id=1qcZ3-FFTbmI075pzNyY2h_XtRdnnTTDl). See below for building
+which [can be accessed here](https://modworkshop.net/mod/36557). See below for building
 GNU+Linux binaries for yourself if you have no success with any other option.
 
 ## Documentation
@@ -109,8 +109,11 @@ cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 If the previous step told you that you're missing some libraries (which is quite likely), install them, and be
 sure to install their development headers too. This can be done via your package manager.
 
-These packages are normally as follows: `libcurl4-openssl-dev`, `libpng-dev`, `libssl-dev`, 
-`zlib-dev` (often called `zlib1g-dev` in debian distro's), and `libopenal-dev`. This is distribution-dependant, naturally, and may also require installing the non-dev-header packages too (`libpng-dev` and `libpng` for example).
+These packages are normally not installed by default, such as: `openssl`, `libssl1.1`, `libcurl4-openssl-dev`, `libssh2-1-dev`, `libpng-dev`, `zlib-dev` (often called `zlib1g-dev` in debian distro's), and `libopenal-dev`. This is distribution and OS-dependant (these packages are named differently on arch-based systems, for example), and may require installing the non-dev-header packages too (`libpng-dev` and `libpng` for example). On Debian Distro's, the command to install all these dependancies looks like:
+
+```
+sudo apt-get install openssl libssl1.1 libssl-dev libcurl4 libcurl4-openssl-dev libopenal1 libopenal-data libopenal-dev zlib1g zlib1g-dev libpng-dev libssh2-1 libssh2-1-dev
+```
 
 Next, compile the loader. You can speed up the compilation process by replacing the number
 "4" with the amount of threads your CPU has (generally it's twice the core count, so
@@ -123,13 +126,13 @@ make -j 4
 Go into the build folder and copy the resulting `libsuperblt_loader.so` into the root directory
 of PAYDAY 2's install folder (the same folder as the binary executable; `payday2_release`).
 
-And finally, add the `LD_PRELOAD` enviornment variable to the Launch Options
+And finally, add the `LD_PRELOAD` enviornment variable to Steams' Launch Options:
 
 ```
 env LD_PRELOAD="$LD_PRELOAD ./libsuperblt_loader.so" %command%
 ```
 
-This environment variable will tell the game to look for the SuperBLT loader when you run PAYDAY 2.
+This environment variable will tell the game to look for the SuperBLT loader in PAYDAY 2's root directory when you run the game.
 
 Be sure to install the basemod from [GitLab:znixian/payday2-superblt-lua](https://gitlab.com/znixian/payday2-superblt-lua),
 as the automatic installer isn't currently implemented on GNU+Linux.

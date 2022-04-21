@@ -1,6 +1,6 @@
 [submodule "lib/mxml"]
 	path = lib/mxml
-	url = https://github.com/michaelrsweet/mxml.git
+	url = https://github.com/segabl/mxml.git
 [submodule "lib/wren"]
 	path = lib/wren
 	url = https://github.com/munificent/wren.git

@@ -188,7 +188,6 @@ namespace pd2hook
 	void HTTPManager::LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback)
 	{
 		PD2HOOK_TRACE_FUNC;
-		PD2HOOK_LOG_LOG("Launching Async HTTP Thread");
 		// This shit's gonna end eventually, how many threads are people going to launch?
 		// Probably a lot.
 		// I'll manage them I guess, but I've no idea when to tell them to join which I believe is part of the constructor.

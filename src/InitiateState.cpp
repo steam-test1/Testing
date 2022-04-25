@@ -471,8 +471,6 @@ namespace pd2hook
 
 	int luaF_dohttpreq(lua_State* L)
 	{
-		PD2HOOK_LOG_LOG("Incoming HTTP Request/Request");
-
 		int args = lua_gettop(L);
 		int progressReference = 0;
 		if (args >= 3)
@@ -485,7 +483,7 @@ namespace pd2hook
 		const char* url_c = lua_tolstring(L, 1, &len);
 		std::string url = std::string(url_c, len);
 
-		PD2HOOK_LOG_LOG(std::string(url_c, len) << " - " << functionReference);
+		PD2HOOK_LOG_LOG("HTTP request to " << std::string(url_c, len));
 
 		lua_http_data* ourData = new lua_http_data();
 		ourData->funcRef = functionReference;

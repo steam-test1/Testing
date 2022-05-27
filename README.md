@@ -14,6 +14,8 @@ Dribbleondo maintains a Linux download that has compiled loaders for Debian-base
 which [can be downloaded from here](https://modworkshop.net/mod/36557). If your distro or Linux OS cannot run the precompiled loader, 
 see below for building GNU+Linux binaries for yourself.
 
+If you are on Linux, It is **strongly** advised that you **DO NOT** use the Flatpak version of Steam when running Payday 2 with SuperBLT enabled, as the Flatpak version of Steam imports various library dependencies that improves compatibility between OS's, while breaking the SuperBLT loader in the process. **You have been warned.**
+
 ## Documentation
 Documentation for the BLT can be found on the [GitHub Wiki](https://github.com/JamesWilko/Payday-2-BLT/wiki) for the project.
 

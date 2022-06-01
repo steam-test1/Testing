@@ -10,6 +10,7 @@ extern "C" {
 #include <dlfcn.h>
 }
 #include <iostream>
+#include <fstream>
 #include "blt/hook.hh"
 #include "blt/elf_utils.hh"
 
@@ -37,6 +38,20 @@ using std::cerr;
 static void
 blt_main ()
 {
+	/*
+	 * So in theory, the lines below should capture this already but on Linux, Steam first launches its own launcher
+	 * which then launches PD2. In theory this should be all fine and dandy, in practice, however, this own launcher
+	 * does not have a .symtab and .strtab which makes `blt::elf_utils::init();` fail. So this is an additional layer
+	 * of protection (now that I think of it, the hack below could theoretically be removed. But who knows, maybe this
+	 * could _somehow_ still happen (new PD2 version or something?) so I'll let it be for now.
+	 */
+	std::string sp;
+	std::ifstream("/proc/self/comm") >> sp;
+
+	if (sp != "payday2_release") {
+		return;
+	}
+
 	blt::elf_utils::init();
 
 	/*

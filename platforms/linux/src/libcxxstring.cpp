@@ -23,8 +23,7 @@ libcxxstring::libcxxstring(std::string value) : str(0)
 // Destructor
 libcxxstring::~libcxxstring()
 {
-	if(str)
-		delete str;
+	delete_str();
 }
 
 // Copy constructor and assignment operator
@@ -54,11 +53,7 @@ const char* libcxxstring::c_str() const
 void libcxxstring::set_contents(const char *src, size_t length)
 {
 	// Clear the string
-	if(str)
-	{
-		delete str;
-		str = NULL;
-	}
+	delete_str();
 
 	// Create our text array
 	str = new char[length];
@@ -71,3 +66,11 @@ void libcxxstring::set_contents(const char *src, size_t length)
 	memcpy(str, src, length);
 }
 
+void libcxxstring::delete_str()
+{
+	if (str && (capacity_and_flags & 1) != 0)
+	{
+		delete str;
+		str = nullptr;
+	}
+}

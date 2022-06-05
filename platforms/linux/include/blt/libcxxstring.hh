@@ -37,6 +37,7 @@ namespace blt
 		char *str;
 
 		void set_contents(const char *value, size_t length);
+		void delete_str();
 	};
 
 	static_assert(sizeof(libcxxstring) == 24);

@@ -75,11 +75,6 @@ class PNGParser final : public dsl::ImageParser
 		archive.read_counter = 0;
 		archive.checked_read_raw(data.data(), data.size());
 
-		// temp test
-		std::ofstream out_test("/tmp/test.png");
-		out_test.write((const char*)data.data(), data.size());
-		out_test.close();
-
 		png_image img;
 		memset(&img, 0, sizeof(img));
 		img.version = PNG_IMAGE_VERSION;

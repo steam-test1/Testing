@@ -56,14 +56,6 @@ char* tweaker::tweak_pd2_xml(char* text, int text_length)
 		return text;
 	}
 
-	// Make sure the file uses XML. All the files I've seen have no whitespace before their first element,
-	// so unless someone has a problem I'll ignore all files that don't have that.
-	// TODO make this a bit more thorough, as theres's a small chance a bianry file will start with a '<'
-	if (text[0] != '<')
-	{
-		return text;
-	}
-
 	const char* new_text = transform_file(text);
 
 	// If the text is not to be altered, we can return it as is.

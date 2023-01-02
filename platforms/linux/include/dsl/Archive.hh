@@ -18,6 +18,10 @@ namespace dsl
 			using FuncType = void (*)(Archive*);
 			static FuncType realCall = reinterpret_cast<FuncType>(blt::elf_utils::find_sym("_ZN3dsl7ArchiveD1Ev"));
 
+			// PD2's dsl::~Archive() deletes the storage without zeroing the pointer to it, so unless we do this first,
+			// the implicit str.blt::~libcxxstring() call at the end of our dsl::~Archive() will cause a double free.
+			str.~libcxxstring();
+
 			realCall(this);
 		}
 

@@ -1,3 +1,12 @@
+# Version 3.3.3
+
+Version 3.3.3 was released on 25 Apr 2022 NZST
+
+* Fix AssetDB Idstring parsing - Hoppip
+* Improve Linux specific code - CraftedCart
+* Update to a less strict, custom version of mxml - Hoppip
+* Reduce amount of http request logging - Hoppip
+
 # Version 3.3.2
 
 Version 3.3.2 was released on 8 Aug 2021 NZST

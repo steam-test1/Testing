@@ -117,12 +117,20 @@ namespace pd2hook
 
 	XAudio::XAudio()
 	{
+		ALCint attributes[] = {
+			/* Disable HRTF */
+			ALC_HRTF_SOFT, ALC_FALSE,
+
+			/* end of list */
+			0
+		};
+
 		dev = alcOpenDevice(NULL);
 		if (!dev)
 		{
 			throw string("Cannot open OpenAL Device");
 		}
-		ctx = alcCreateContext(dev, NULL);
+		ctx = alcCreateContext(dev, attributes);
 		alcMakeContextCurrent(ctx);
 		if (!ctx)
 		{

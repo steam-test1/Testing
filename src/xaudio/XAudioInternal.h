@@ -13,6 +13,7 @@
 
 #include "lua.h"
 #include "util/util.h"
+#include "AL/alext.h"
 
 using namespace std;
 

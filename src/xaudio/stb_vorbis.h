@@ -66,8 +66,19 @@ typedef struct
    int max_frame_size;
 } stb_vorbis_info;
 
+typedef struct
+{
+   char *vendor;
+
+   int comment_list_length;
+   char **comment_list;
+} stb_vorbis_comment;
+
 // get general information about the file
 extern stb_vorbis_info stb_vorbis_get_info(stb_vorbis *f);
+
+// get ogg comments
+extern stb_vorbis_comment stb_vorbis_get_comment(stb_vorbis *f);
 
 // get the last error detected (clears it, too)
 extern int stb_vorbis_get_error(stb_vorbis *f);
@@ -140,6 +151,12 @@ extern int stb_vorbis_decode_frame_pushdata(
 // channel. In other words, (*output)[0][0] contains the first sample from
 // the first channel, and (*output)[1][0] contains the first sample from
 // the second channel.
+//
+// *output points into stb_vorbis's internal output buffer storage; these
+// buffers are owned by stb_vorbis and application code should not free
+// them or modify their contents. They are transient and will be overwritten
+// once you ask for more data to get decoded, so be sure to grab any data
+// you need before then.
 
 extern void stb_vorbis_flush_pushdata(stb_vorbis *f);
 // inform stb_vorbis that your next datablock will not be contiguous with
@@ -192,7 +209,7 @@ extern stb_vorbis * stb_vorbis_open_file(FILE *f, int close_handle_on_close,
 // create an ogg vorbis decoder from an open FILE *, looking for a stream at
 // the _current_ seek point (ftell). on failure, returns NULL and sets *error.
 // note that stb_vorbis must "own" this stream; if you seek it in between
-// calls to stb_vorbis, it will become confused. Morever, if you attempt to
+// calls to stb_vorbis, it will become confused. Moreover, if you attempt to
 // perform stb_vorbis_seek_*() operations on this file, it will assume it
 // owns the _entire_ rest of the file after the start point. Use the next
 // function, stb_vorbis_open_file_section(), to limit it.
@@ -313,7 +330,8 @@ enum STBVorbisError
    VORBIS_invalid_first_page,
    VORBIS_bad_packet_type,
    VORBIS_cant_find_last_page,
-   VORBIS_seek_failed
+   VORBIS_seek_failed,
+   VORBIS_ogg_skeleton_not_supported
 };
 
 

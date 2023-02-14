@@ -88,6 +88,17 @@ namespace pd2hook
 			return result;
 		}
 
+		bool IsSymlink(const std::string& path)
+		{
+			struct stat fileInfo;
+
+			if (lstat(path.c_str(), &fileInfo) == 0)
+			{
+				return S_ISLNK(fileInfo.st_mode);
+			}
+			return false;
+		}
+
 		/**
 		 * Check if a path exists, and is a directory.
 		 */
@@ -110,10 +121,9 @@ namespace pd2hook
 			return mkdir(path.c_str(), 0777) == 0;
 		}
 
-		bool
-		RemoveEmptyDirectory(const string &path)
+		bool RemoveEmptyDirectory(const string &path)
 		{
-			return remove(path.c_str());
+			return remove(path.c_str()) == 0;
 		}
 
 		/*

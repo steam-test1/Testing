@@ -2,6 +2,8 @@
 #include "util/util.h"
 
 #include <fstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -30,6 +32,38 @@ namespace pd2hook
 			std::string finalPath = path.substr(0, finalSlash);
 			if (DirectoryExists(finalPath)) return;
 			CreateDirectoryPath(finalPath);
+		}
+
+		bool RemoveDirectory(const std::string& path)
+		{
+			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(path, true);
+			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(path);
+			bool failed = false;
+
+			for (auto it = files.begin(); it < files.end(); it++)
+			{
+				failed = remove((path + "/" + *it).c_str());
+				if (failed)
+					return false;
+			}
+			for (auto it = dirs.begin(); it < dirs.end(); it++)
+			{
+				if (*it == "." || *it == "..")
+					continue;
+
+				// dont follow symlinks, just delete them as a file, recurse on normal directories
+				if (pd2hook::Util::IsSymlink(path + "/" + *it))
+				{
+					failed = remove((path + "/" + *it).c_str());
+				}
+				else
+				{
+					failed = pd2hook::Util::RemoveDirectory(path + "/" + *it) == 0;
+				}
+				if (failed)
+					return false;
+			}
+			return RemoveEmptyDirectory(path);
 		}
 
 		bool CreateDirectoryPath(const std::string& path)

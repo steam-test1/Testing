@@ -71,6 +71,17 @@ namespace pd2hook
 			return files;
 		}
 
+		bool IsSymlink(const std::string& path)
+		{
+			DWORD dwAttrib = GetFileAttributesA(path.c_str());
+
+			if (dwAttrib == FILE_ATTRIBUTE_REPARSE_POINT)
+			{
+				return true;
+			}
+			return false;
+		}
+
 		bool DirectoryExists(const std::string& dir)
 		{
 			string clean = dir;

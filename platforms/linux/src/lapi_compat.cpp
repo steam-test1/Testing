@@ -4,6 +4,7 @@ extern "C" {
 }
 
 #include <blt/lapi_compat.hh>
+#include <util/util.h>
 #include <string.h>
 #include <errno.h>
 #include <lua.h>
@@ -41,13 +42,37 @@ namespace blt
 				lua_pushboolean(state, res == 0);
 				return 1;
 			}
+
+			int delete_file(lua_state* state)
+			{
+				std::string path = lua_tostring(state, -1);
+				bool success = false;
+
+				if (pd2hook::Util::GetFileType(path) == pd2hook::Util::FileType_File)
+				{
+					success = remove(path.c_str()) == 0;
+				}
+				else
+				{
+					success = pd2hook::Util::RemoveDirectory(path);
+				}
+
+				if (!success)
+				{
+					PD2HOOK_LOG_LOG("Could not delete " + path + ": " + strerror(errno));
+				}
+
+				lua_pushboolean(state, success);
+				return 1;
+			}
 		}
 
 		void add_members(lua_state* state)
 		{
 			luaL_Reg lib_SystemFS[] =
 			{
-				{ "exists",         SystemFS::exists        },
+				{"delete_file", SystemFS::delete_file},
+				{"exists", SystemFS::exists},
 				{ NULL, NULL }
 			};
 			luaL_openlib(state, "SystemFS", lib_SystemFS, 0);

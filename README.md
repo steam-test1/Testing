@@ -141,50 +141,50 @@ as the automatic installer isn't currently implemented on GNU+Linux.
 
 ### Windows
 
-Payday2 BLT requires the following dependencies, which are all statically linked.
-* zlib
-* cURL
-* OpenSSL
-* OpenAL
-
-#### zLib
-zLib should be compiled as static.
-
-If you don't want to stuff with NASM for the assembly module, there is a parameter you
-can set to only use C. The performance difference isn't important for something used
-on occasion (unpacking mod updates).
-
-#### cURL
-cURL should be compiled as static, with the WITH_SSL parameter set to 'static'.
-
-#### OpenSSL
-OpenSSL should be compiled as a static library.
-
-#### OpenALSoft
-Again, compile OpenALSoft as a static library.
-
-#### Configuration
-
-Set some environment variables, telling CMake where to find the required external libraries.
-
-I'd suggest you put them into a batch file with the CMake build command, to make things
-easier when you next have to run CMake.
-
-They are as follows (search for them in `CMakeLists.txt` if you want more information):
+First, clone this repository, and pull all required projects and repositories into one folder (Note: You **NEED** to do this, otherwise you'll get runtime and compile errors):
 
 ```
-ZLIB_ROOT
-ZLIB_LIBRARY
-CURL_INCLUDE_DIR
-CURL_LIBRARY
-OPENSSL_ROOT_DIR
-OPENAL_LIBRARY
-OPENAL_INCLUDE_DIR
+git clone --recursive https://gitlab.com/znixian/payday2-superblt.git
 ```
 
-(Anything ending in _LIBRARY should be the filename of a .lib static-linked library)
+Next open it in your IDE of choice. In CLion, select `File -> Open` and the folder created
+by git clone. For Visual Studio, select `File -> Open -> CMake` and select the top-level
+`CMakeLists.txt` file.
 
-TODO: Finish writing instructions
+Next set your IDE to build a 32-bit binary. In CLion first ensure you have a x86 toolchain
+configured, in `File | Settings | Build, Execution, Deployment | Toolchains` - add a new
+Visual Studio toolchain and set the architecture to `x86`. Ensure this toolchain is selected
+in `File | Settings | Build, Execution, Deployment | CMake`, in your `Debug` configuration and
+inside the toolchain box. Once CMake is done, select `WSOCK32` in the target box.
+
+To enable multithreaded builds in CLion (which massively improves build times) you need to
+download [JOM](https://wiki.qt.io/Jom). In the toolchain you added earlier, set the `Make`
+field to the path of the `jom.exe` file you extracted earlier.
+
+In Visual Studio, select the configuration box (at the top of the window, which may for
+example say `x64-Debug`) and select `Manage Configurations...` if it isn't set to `x86-Debug` already.
+Remove the existing configuration then add a new one, and select `x86-Debug`.
+Select `Project->Generate Cache` and wait for it to run cmake - this may take some time.
+
+At this point you can compile your project. In CLion, Click the little green hammer in the top-right
+of CLion (the shortcut varies depending on platform). In Visual Studio, press F7. In either case this
+will take some time as it compiles all of SuperBLT's dependencies, and finally SuperBLT itself.
+
+Finally, you can make PAYDAY use your custom-built version of SBLT instead of having to copy the built
+file to the PAYDAY directory each time you change something.
+To do this, go to your `PAYDAY 2` directory and open PowerShell. Run:
+
+```
+cmd /c mklink WSOCK32.dll <path to SBLT>\out\build\x86-Debug\WSOCK32.dll
+```
+
+for Visual Studio, or:
+
+```
+cmd /c mklink WSOCK32.dll <path to SBLT>\cmake-build-debug\WSOCK32.dll
+```
+
+for CLion.
 
 ### Code Conventions
 - Avoid `std::shared_ptr` and the likes unless you have a decent reason to use it. If you

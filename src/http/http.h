@@ -40,17 +40,11 @@ namespace pd2hook
 	public:
 		~HTTPManager();
 
-		void init_locks();
-
 		static HTTPManager* GetSingleton();
-
-		void SSL_Lock(int lockno);
-		void SSL_Unlock(int lockno);
 
 		void LaunchHTTPRequest(std::unique_ptr<HTTPItem> callback);
 	private:
 		std::unique_ptr<std::mutex[]> openssl_locks;
-		int numLocks = 0;
 		std::list<std::unique_ptr<std::thread>> threadList;
 	};
 }

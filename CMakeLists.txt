@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 project(SuperBLT)
 
 # Allow us to attach the winmm.lib dependency to OpenAL on Windows
@@ -168,15 +168,15 @@ if(WIN32)
 
 	# Note that libressl must be downloaded seperately, since it requires some pre-configuration that
 	# is inconvenient on Windows. Here's the download URL:
-	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.4.3.tar.gz
-	set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.4.3)
+	# https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.6.2.tar.gz
+	set(LSSL_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/sys/libressl-3.6.2)
 	set(LSSL_TARBALL ${LSSL_SRCDIR}.tar.gz)
 	if(NOT EXISTS ${LSSL_TARBALL})
 		# TODO move this to my (ZNix's) server, in case the paths ever change
 		message("Downloading LibreSSL")
-		file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.4.3.tar.gz" ${LSSL_TARBALL}
+		file(DOWNLOAD "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.6.2.tar.gz" ${LSSL_TARBALL}
 			TIMEOUT 60  # seconds
-			EXPECTED_HASH SHA256=ff88bffe354818b3ccf545e3cafe454c5031c7a77217074f533271d63c37f08d
+			EXPECTED_HASH SHA256=4be80fff073746cf50b4a8e5babe2795acae98c6b132a9e02519b445dfbfd033
 			TLS_VERIFY ON
 		)
 	endif()
@@ -209,7 +209,8 @@ if(WIN32)
 	target_link_libraries(SuperBLT OpenAL)
 	# target_include_directories(SuperBLT PRIVATE ${OpenAL_SOURCE_DIR}/include) # No longer needed
 
-	add_subdirectory(lib/sys/libressl-3.4.3 EXCLUDE_FROM_ALL)
+	add_subdirectory(lib/sys/libressl-3.6.2 EXCLUDE_FROM_ALL)
+	target_include_directories(SuperBLT PRIVATE ${LSSL_SRCDIR}/include) # Required for latest version of LibreSSL
 	target_link_libraries(SuperBLT crypto)
 
 	#### CURL ####

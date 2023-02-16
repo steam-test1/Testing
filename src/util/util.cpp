@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 namespace pd2hook
 {
@@ -40,19 +40,34 @@ namespace pd2hook
 			os << exceptionName() << " occurred @ (" << mFile << ':' << mLine << "). " << what();
 		}
 
-		std::string sha256(const std::string str)
+		// from https://stackoverflow.com/a/62605880/11871110
+		// Updated sha256 functions to use latest OpenSSL/LibreSSL
+		
+		//helper function to print the digest bytes as a hex string
+		std::string bytes_to_hex_string(const std::vector<uint8_t>& bytes)
 		{
-			unsigned char hash[SHA256_DIGEST_LENGTH];
-			SHA256_CTX sha256;
-			SHA256_Init(&sha256);
-			SHA256_Update(&sha256, str.c_str(), str.size());
-			SHA256_Final(hash, &sha256);
-			std::stringstream ss;
-			for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+			std::ostringstream stream;
+			for (uint8_t b : bytes)
 			{
-				ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+				stream << std::setw(2) << std::setfill('0') << std::hex << static_cast<int>(b);
 			}
-			return ss.str();
+			return stream.str();
+		}
+
+		//perform the SHA3-512 hash
+		std::string sha256(const std::string& input)
+		{
+			uint32_t digest_length = 32;
+			const EVP_MD* algorithm = EVP_sha256();
+			uint8_t* digest = static_cast<uint8_t*>(OPENSSL_malloc(digest_length));
+			EVP_MD_CTX* context = EVP_MD_CTX_new();
+			EVP_DigestInit_ex(context, algorithm, nullptr);
+			EVP_DigestUpdate(context, input.c_str(), input.size());
+			EVP_DigestFinal_ex(context, digest, &digest_length);
+			EVP_MD_CTX_destroy(context);
+			std::string output = bytes_to_hex_string(std::vector<uint8_t>(digest, digest + digest_length));
+			OPENSSL_free(digest);
+			return output;
 		}
 
 		void RecurseDirectoryPaths(std::vector<std::string>& paths, std::string directory, bool ignore_versioning)

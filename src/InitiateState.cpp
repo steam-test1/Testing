@@ -995,7 +995,7 @@ namespace blt
 		{
 			if (updates == 0)
 			{
-				HTTPManager::GetSingleton()->init_locks();
+				PD2HOOK_LOG_LOG("Checking for updates");
 			}
 
 			if (updates > 1)

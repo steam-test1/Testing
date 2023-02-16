@@ -32,18 +32,6 @@ namespace pd2hook
 	PD2HOOK_REGISTER_EVENTQUEUE(HTTPProgressNotificationPtr, HTTPProgressNotification)
 	PD2HOOK_REGISTER_EVENTQUEUE(HTTPItemPtr, HTTPItem)
 
-	void lock_callback(int mode, int type, const char* file, int line)
-	{
-		if (mode & CRYPTO_LOCK)
-		{
-			HTTPManager::GetSingleton()->SSL_Lock(type);
-		}
-		else
-		{
-			HTTPManager::GetSingleton()->SSL_Unlock(type);
-		}
-	}
-
 	HTTPManager::HTTPManager()
 	{
 		// Curl Init
@@ -53,7 +41,6 @@ namespace pd2hook
 
 	HTTPManager::~HTTPManager()
 	{
-		CRYPTO_set_locking_callback(NULL);
 		PD2HOOK_LOG_LOG("CURL CLOSED");
 		curl_global_cleanup();
 
@@ -63,28 +50,10 @@ namespace pd2hook
 		});
 	}
 
-	void HTTPManager::init_locks()
-	{
-		PD2HOOK_TRACE_FUNC;
-		numLocks = CRYPTO_num_locks();
-		openssl_locks.reset(new std::mutex[numLocks]);
-		CRYPTO_set_locking_callback(lock_callback);
-	}
-
 	HTTPManager* HTTPManager::GetSingleton()
 	{
 		static HTTPManager httpSingleton;
 		return &httpSingleton;
-	}
-
-	void HTTPManager::SSL_Lock(int lockno)
-	{
-		openssl_locks[lockno].lock();
-	}
-
-	void HTTPManager::SSL_Unlock(int lockno)
-	{
-		openssl_locks[lockno].unlock();
 	}
 
 	size_t write_http_header(char* ptr, size_t size, size_t nmemb, void* data)

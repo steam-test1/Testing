@@ -1,6 +1,9 @@
 # Version 3.3.5
 
 * Hotfix for missing function signature - Hoppip
+* Update OpenSSL, ZLib and OGG decoder - test1
+* Implement SystemFS:delete_file - Der Muggemann
+* Disable HRTF to improve audio quality - test1
 
 # Version 3.3.4
 

@@ -34,7 +34,7 @@ namespace pd2hook
 			CreateDirectoryPath(finalPath);
 		}
 
-		bool RemoveDirectory(const std::string& path)
+		bool RemoveFilesAndDirectory(const std::string& path)
 		{
 			std::vector<std::string> dirs = pd2hook::Util::GetDirectoryContents(path, true);
 			std::vector<std::string> files = pd2hook::Util::GetDirectoryContents(path);
@@ -58,7 +58,7 @@ namespace pd2hook
 				}
 				else
 				{
-					failed = pd2hook::Util::RemoveDirectory(path + "/" + *it) == 0;
+					failed = pd2hook::Util::RemoveFilesAndDirectory(path + "/" + *it) == 0;
 				}
 				if (failed)
 					return false;

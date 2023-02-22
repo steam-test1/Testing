@@ -30,7 +30,7 @@ namespace pd2hook
 		FileType GetFileType(const std::string& file);
 		void EnsurePathWritable(const std::string& path);
 		bool RemoveEmptyDirectory(const std::string& dir);
-		bool RemoveDirectory(const std::string& dir);
+		bool RemoveFilesAndDirectory(const std::string& dir);
 		bool IsSymlink(const std::string& path);
 		bool DirectoryExists(const std::string& dir);
 		bool CreateDirectorySingle(const std::string& dir);

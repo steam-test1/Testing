@@ -54,7 +54,7 @@ namespace blt
 				}
 				else
 				{
-					success = pd2hook::Util::RemoveDirectory(path);
+					success = pd2hook::Util::RemoveFilesAndDirectory(path);
 				}
 
 				if (!success)

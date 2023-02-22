@@ -65,7 +65,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tointeger, size_t, "\x55\x8B\xEC\x83\xE4\xF
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tonumber, lua_Number, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x08\xFF\x75\x0C\xFF\x75\x08\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF2\x77\x06\xDD", "xxxxxxxxxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tolstring, const char*, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x53\x8B\x5C\x24\x2C\x56\x8B\x74\x24\x34", "xxxx????xxxxxxxxxxxxxxxx", 0, lua_State*, int, size_t*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_objlen, size_t, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x8B\x44", "xxxx????xxxxxxxx", 0, lua_State*, int)
-CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8\x83\xD2\xFE\xFF******\x83\xF9\xF3\x75\x06\x8B\x00\x83\xC0\x18\xC3\x83\xF9", "xxxxxxxxxxxxx??????xxxxxxxxxxxxx", 0, lua_State*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8\x53\xD0\xFE\xFF******\x83\xF9\xF3\x75\x06\x8B\x00\x83\xC0\x18\xC3\x83\xF9", "xxxxxxxxxxxxx??????xxxxxxxxxxxxx", 0, lua_State*, int)
 // This is actually luaL_loadfilex() (as per Lua 5.2) now. The new parameter corresponds to mode, and specifying NULL causes Lua
 // to default to "bt", i.e. 'binary and text'
 // https://www.lua.org/manual/5.2/manual.html#luaL_loadfilex

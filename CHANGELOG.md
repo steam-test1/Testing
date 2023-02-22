@@ -1,3 +1,7 @@
+# Version 3.3.5
+
+* Hotfix for missing function signature - Hoppip
+
 # Version 3.3.4
 
 * Improve Linux specific code - ZNix, Azer0s, whitequark

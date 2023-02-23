@@ -360,7 +360,6 @@ void SignatureSearch::Search()
 		//  by ~2.5 seconds.
 		if (it->vr == (is_in_vr ? SignatureVR_Desktop : SignatureVR_VR))
 		{
-			*(void**)it->address = NULL;
 			continue;
 		}
 

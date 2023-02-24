@@ -175,6 +175,9 @@ namespace pd2hook
 		int XASource_set_velocity(lua_State *L);
 		int XASource_set_direction(lua_State *L);
 
+		int XASource_set_min_distance(lua_State* L);
+		int XASource_set_max_distance(lua_State* L);
+
 		int XASource_get_gain(lua_State *L);
 		int XASource_set_gain(lua_State *L);
 

@@ -137,6 +137,8 @@ namespace pd2hook
 			throw string("Could not create OpenAL Context");
 		}
 
+		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
 		PD2HOOK_LOG_LOG("Loaded OpenAL XAudio API");
 	}
 
@@ -215,6 +217,9 @@ namespace pd2hook
 			{ "setposition", xasource::XASource_set_position },
 			{ "setvelocity", xasource::XASource_set_velocity },
 			{ "setdirection", xasource::XASource_set_direction },
+
+			{ "setmindis", xasource::XASource_set_min_distance },
+			{ "setmaxdis", xasource::XASource_set_max_distance },
 
 			{ "getgain", xasource::XASource_get_gain },
 			{ "setgain", xasource::XASource_set_gain },

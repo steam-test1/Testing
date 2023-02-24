@@ -51,6 +51,10 @@ namespace pd2hook
 
 		for (size_t i = 0; i < count; i++)
 		{
+			// These seem very close to how most sounds play in game
+			alSourcef(sources[i], AL_REFERENCE_DISTANCE, 10);
+			alSourcef(sources[i], AL_MAX_DISTANCE, 60);
+
 			XASource *buff = new XASource(sources[i]);
 			openSources.insert(buff);
 			*(XALuaHandle*)lua_newuserdata(L, sizeof(XALuaHandle)) = XALuaHandle(buff);
@@ -187,6 +191,28 @@ namespace pd2hook
 	{
 		// FIXME doesn't *seem* to work?
 		set_vector_property(L, AL_DIRECTION);
+		return 0;
+	}
+
+	int xasource::XASource_set_min_distance(lua_State* L)
+	{
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
+
+		ALfloat value = lua_tonumber(L, 2);
+		alSourcef(xthis->Handle(L), AL_REFERENCE_DISTANCE, value);
+		ALERR;
+
+		return 0;
+	}
+
+	int xasource::XASource_set_max_distance(lua_State* L)
+	{
+		XALuaHandle* xthis = (XALuaHandle*)lua_touserdata(L, 1);
+
+		ALfloat value = lua_tonumber(L, 2);
+		alSourcef(xthis->Handle(L), AL_MAX_DISTANCE, value);
+		ALERR;
+
 		return 0;
 	}
 

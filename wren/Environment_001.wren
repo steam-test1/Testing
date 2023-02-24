@@ -12,4 +12,7 @@ class Environment {
     // should be used when using it as it can lead to non-obvious results for code a few
     // layers up in the callstack.
     foreign static mod_directory_at_depth(depth)
+
+    // Returns wether the game is running in VR or not
+    foreign static is_vr
 }

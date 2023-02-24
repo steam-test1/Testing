@@ -9,6 +9,10 @@
 #include <string.h>
 #include <string>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 // Hack to get the stack trace
 extern "C"
 {
@@ -84,6 +88,20 @@ void get_mod_directory_at_depth(WrenVM* vm)
 	get_mod_directory_impl(vm, depth);
 }
 
+void is_vr(WrenVM* vm)
+{
+	bool is_vr = false;
+
+#ifdef _WIN32
+	TCHAR processPath[MAX_PATH + 1];
+	GetModuleFileName(NULL, processPath, MAX_PATH + 1);
+	std::string processPathString = processPath;
+	is_vr = processPathString.rfind("_vr.exe") == processPathString.length() - 7;
+#endif
+
+	wrenSetSlotBool(vm, 0, is_vr);
+}
+
 WrenForeignMethodFn pd2hook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm, const char* module,
                                                                      const char* className, bool isStatic,
                                                                      const char* signature)
@@ -99,6 +117,10 @@ WrenForeignMethodFn pd2hook::tweaker::wren_env::bind_wren_env_method(WrenVM* vm,
 			else if (isStatic && strcmp(signature, "mod_directory_at_depth(_)") == 0)
 			{
 				return &get_mod_directory_at_depth;
+			}
+			else if (isStatic && strcmp(signature, "is_vr") == 0)
+			{
+				return &is_vr;
 			}
 		}
 	}

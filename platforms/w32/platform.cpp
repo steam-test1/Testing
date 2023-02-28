@@ -46,7 +46,7 @@ static int __fastcall luaL_newstate_new(void* thislol, int edx, char no, char fr
 	int ret = luaL_newstate(thislol, no, freakin, clue);
 
 	lua_State* L = (lua_State*)*((void**)thislol);
-	printf("Lua State: %p\n", (void*)L);
+	//printf("Lua State: %p\n", (void*)L);
 	if (!L) return ret;
 
 	blt::lua_functions::initiate_lua(L);

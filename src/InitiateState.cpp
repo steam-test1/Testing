@@ -981,7 +981,15 @@ namespace blt
 				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
 				return;
 			}
-			lua_call(L, 0, 0);
+			
+			result = lua_pcall(L, 0, 0, 0);
+			if (result != 0)
+			{
+				size_t len;
+				PD2HOOK_LOG_ERROR("Failed initializing the basemod:");
+				PD2HOOK_LOG_ERROR(lua_tolstring(L, -1, &len));
+				abort();
+			}
 
 			return;
 		}

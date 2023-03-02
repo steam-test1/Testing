@@ -52,8 +52,8 @@ namespace pd2hook
 		for (size_t i = 0; i < count; i++)
 		{
 			// These seem very close to how most sounds play in game
-			alSourcef(sources[i], AL_REFERENCE_DISTANCE, 10);
-			alSourcef(sources[i], AL_MAX_DISTANCE, 60);
+			alSourcef(sources[i], AL_REFERENCE_DISTANCE, 5);
+			alSourcef(sources[i], AL_MAX_DISTANCE, 50);
 
 			XASource *buff = new XASource(sources[i]);
 			openSources.insert(buff);

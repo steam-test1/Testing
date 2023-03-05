@@ -1,30 +1,42 @@
-# Version 3.3.5
+# SuperBLT DLL Changelog
 
-* Hotfix for missing function signature - Hoppip
-* Update OpenSSL, ZLib and OGG decoder - test1
-* Implement SystemFS:delete_file - Der Muggemann
-* Disable HRTF to improve audio quality - test1
+This lists the changes between different versions of the SuperBLT DLL,
+the changes for the basemod are listed in their own changelog.
+Contributors other than maintainers are listed in parenthesis after specific changes.
 
-# Version 3.3.4
+## Version 3.3.6
 
-* Improve Linux specific code - ZNix, Azer0s, whitequark
-* Improve XML parsing - Hoppip
-* Update Lua function signature - Cpone
+- Added a VR check for Wren
+- Updated Wren to the latest version (test1)
+- Added min and max audio distance for XAudio sources
+- Fixed crash with VR version of the game
 
-# Version 3.3.3
+## Version 3.3.5
 
-* Fix AssetDB Idstring parsing - Hoppip
-* Improve Linux specific code - CraftedCart
-* Update to a less strict, custom version of mxml - Hoppip
-* Reduce amount of http request logging - Hoppip
+This is a hotfix for a missing function signature
 
-# Version 3.3.2
+- Updated OpenSSL, ZLib and OGG decoder (test1)
+- Implemented SystemFS:delete_file (Der Muggemann)
+- Disabled HRTF to improve audio quality (test1)
 
-This is a hotfix - if your game already works fine, upgrading to this version won't change anything.
+## Version 3.3.4
 
-* Fix crashes on computers with all.blb or any other files (not folders) with names shorter than eight letters in the assets directory - ZNix
-* Fix a compile issue on Linux - roberChen
+- Improved Linux specific code (Azer0s, whitequark)
+- Improved XML parsing
+- Updated Lua function signature (Cpone)
 
-# Version 3.3.1 and below
+## Version 3.3.3
+
+- Fixed AssetDB Idstring parsing
+- Improved Linux specific code (CraftedCart)
+- Updated to a less strict, custom version of mxml
+- Reduced amount of http request logging
+
+## Version 3.3.2
+
+- Fixed crashes on computers with all.blb or any other files with names shorter than eight letters in the assets directory
+- Fixed a compile issue on Linux (roberChen)
+
+## Version 3.3.1 and below
 
 These versions do not have nicely formatted changelogs, but you can see their Git commit history in GitLab if required.

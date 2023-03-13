@@ -595,14 +595,35 @@ namespace pd2hook
 		}
 	}
 
+	static const char* mxml_last_error = NULL;
+	static void handle_mxml_error(const char* error)
+	{
+		mxml_last_error = error;
+	}
+
 	int luaF_parsexml(lua_State * L)
 	{
 		const char *xml = lua_tostring(L, 1);
 
+		mxmlSetErrorCallback(handle_mxml_error);
+
 		mxml_node_t *tree = mxmlLoadString(NULL, xml, MXML_IGNORE_CALLBACK);
 
+		if (mxml_last_error)
+		{
+			PD2HOOK_LOG_ERROR("Could not parse XML: Error and original file below");
+			PD2HOOK_LOG_ERROR(mxml_last_error);
+			PD2HOOK_LOG_ERROR(xml);
+
+			mxml_last_error = NULL;
+
+			lua_pushnil(L);
+
+			return 1;
+		}
+
 		mxml_node_t *base = tree;
-		if (!strncmp(mxmlGetElement(base), "?xml", 4))
+		if (base && !strncmp(mxmlGetElement(base), "?xml", 4))
 		{
 			base = mxmlGetFirstChild(base);
 		}
@@ -613,7 +634,10 @@ namespace pd2hook
 		}
 		else
 		{
-			lua_pushboolean(L, false); // TODO pushnil
+			PD2HOOK_LOG_ERROR("Parsed XML does not contain any nodes");
+			PD2HOOK_LOG_ERROR(xml);
+
+			lua_pushnil(L);
 		}
 
 		mxmlDelete(tree);

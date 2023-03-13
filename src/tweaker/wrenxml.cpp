@@ -89,14 +89,12 @@ static char *mxml_last_error = NULL;
 
 static void handle_mxml_error_crash(const char* error)
 {
-	PD2HOOK_LOG_ERROR("Could not load XML: Error and original file below");
+	PD2HOOK_LOG_ERROR("Could not parse XML: Error and original file below");
 	PD2HOOK_LOG_ERROR(error);
-	PD2HOOK_LOG_ERROR("Input XML:");
 	PD2HOOK_LOG_ERROR(last_loaded_xml);
 
-	const char *message = "[WREN/WXML] XML.new: parse error - see log for details";
-	PD2HOOK_LOG_ERROR(message);
 #ifdef _WIN32
+	const char *message = "[WREN/WXML] XML parse error - see mods/logs for details";
 	MessageBox(0, message, "XML Parse Error", MB_OK);
 #endif
 	exit(1);

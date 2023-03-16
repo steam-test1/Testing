@@ -529,9 +529,17 @@ namespace pd2hook
 		std::stringstream stream;
 		for (int i = 0; i < top; ++i)
 		{
-			size_t len;
-			const char* str = lua_tolstring(L, i + 1, &len);
-			stream << (i > 0 ? "    " : "") << str;
+			stream << (i > 0 ? "    " : "");
+			if (lua_isboolean(L, i + 1))
+			{
+				stream << (lua_toboolean(L, i + 1) ? "true" : "false");
+			}
+			else
+			{
+				size_t len;
+				const char* str = lua_tolstring(L, i + 1, &len);
+				stream << (str ? str : lua_typename(L, lua_type(L, i + 1)));
+			}
 		}
 		PD2HOOK_LOG_LUA(stream.str());
 

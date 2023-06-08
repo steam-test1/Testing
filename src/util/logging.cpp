@@ -214,7 +214,7 @@ namespace pd2hook
 
 			// Always flush high-priority messages, in case the game crashes we don't want
 			// the end of the log to get lost.
-			if (msgType == LogType::LOGGING_ERROR)
+			if (msgType == LogType::LOGGING_WARN || msgType == LogType::LOGGING_ERROR)
 			{
 				needsFlush = true;
 			}

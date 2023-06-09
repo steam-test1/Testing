@@ -4,6 +4,13 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.3.7
+
+- Fixed signatures for U237 (Bo)
+- Increased robustness of log function
+- Increased error tolerance for XML parsing
+- Fixed blt.parsexml reporting incorrect XML files on error
+
 ## Version 3.3.6
 
 - Added a VR check for Wren

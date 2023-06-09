@@ -43,17 +43,17 @@ class PDString
 static_assert(sizeof(PDString) == 24 + sizeof(std::string), "PDString is the wrong size!");
 
 // The signature is the same for all try_open methods, so one typedef will work for all of them.
-typedef void(__thiscall* try_open_t)(void* this_, void* archive, int a, int b, blt::idstring type, blt::idstring name);
+typedef void(__thiscall* try_open_t)(void* this_, void* archive, blt::idstring type, blt::idstring name, int a, int b);
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, int u1, int u2,
-                      blt::idstring type, blt::idstring name);
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
+                      blt::idstring type, blt::idstring name, int u1, int u2);
 
-#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                    \
-	static subhook::Hook hook_##id;                                                                      \
-	void __fastcall stub_##id(void* this_, int edx, void* archive, int u1, int u2, blt::idstring type,   \
-	                          blt::idstring name)                                                        \
-	{                                                                                                    \
-		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, u1, u2, type, name); \
+#define DECLARE_PASSTHROUGH_ARRAY(id)                                                                              \
+	static subhook::Hook hook_##id;                                                                                \
+	void __fastcall stub_##id(void* this_, int edx, void* archive, blt::idstring type, blt::idstring name, int u1, \
+	                          int u2)                                                                              \
+	{                                                                                                              \
+		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, type, name, u1, u2);           \
 	}
 
 // Four hooks for the other try_open functions: property_match_resolver, language_resolver, english_resolver and funcptr_resolver
@@ -62,8 +62,8 @@ DECLARE_PASSTHROUGH_ARRAY(1)
 DECLARE_PASSTHROUGH_ARRAY(2)
 DECLARE_PASSTHROUGH_ARRAY(3)
 
-static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, int u1, int u2,
-                      blt::idstring type, blt::idstring name)
+static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive,
+                      blt::idstring type, blt::idstring name, int u1, int u2)
 {
 	// Try hooking this asset, and see if we need to handle it differently
 	BLTAbstractDataStore* datastore = nullptr;
@@ -76,12 +76,12 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	if (found)
 	{
 		PDString pd_name(ds_name);
-		Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0xdeadbeef);
+		Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0);
 		return;
 	}
 
 	subhook::ScopedHookRemove scoped_remove(&hook);
-	orig(this_, archive, u1, u2, type, name);
+	orig(this_, archive, type, name, u1, u2);
 
 	// Read the probably_not_loaded_flag to see if this archive failed to load - if so try again but also
 	// look for hooks with the fallback bit set
@@ -93,7 +93,7 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 			// Note the deadbeef is for the stack padding argument - see the comment on this signature's declaration
 			// for more information.
 			PDString pd_name(ds_name);
-			Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0xdeadbeef);
+			Archive_ctor(archive, &pd_name, datastore, pos, len, false, 0);
 			return;
 		}
 	}

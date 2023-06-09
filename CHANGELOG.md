@@ -4,6 +4,12 @@ This lists the changes between different versions of the SuperBLT DLL,
 the changes for the basemod are listed in their own changelog.
 Contributors other than maintainers are listed in parenthesis after specific changes.
 
+## Version 3.3.8
+
+This is a hotfix for asset database loading
+
+- Fixed loading assets from database (Cpone)
+
 ## Version 3.3.7
 
 - Fixed signatures for U237 (Bo)

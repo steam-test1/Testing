@@ -1,3 +1,6 @@
+#include <vector>
+#define INCLUDE_TRY_OPEN_FUNCTIONS
+
 #include "platform.h"
 
 #include "lua.h"
@@ -10,6 +13,7 @@
 #include "assets/assets.h"
 
 #include "subhook.h"
+#include "util/util.h"
 
 #include <fstream>
 #include <string>
@@ -30,12 +34,18 @@ static void init_idstring_pointers()
 {
 	char *tmp;
 
-	tmp = (char*)try_open_property_match_resolver;
-	tmp += 0x46;
+	if (try_open_functions.empty())
+	{
+		PD2HOOK_LOG_WARN("Could not init idstring pointers because no asset resolver functions were found.");
+		return;
+	}
+
+	tmp = (char*)try_open_functions.at(0);
+	tmp += 0x63;
 	blt::platform::last_loaded_name = *((blt::idstring**)tmp);
 
-	tmp = (char*)try_open_property_match_resolver;
-	tmp += 0x2B;
+	tmp = (char*)try_open_functions.at(0);
+	tmp += 0x53;
 	blt::platform::last_loaded_ext = *((blt::idstring**)tmp);
 }
 
@@ -83,33 +93,10 @@ void lua_close_new(lua_State* L)
 
 //////////// Start of XML tweaking stuff
 
-// Fastcall wrapper
 static void __fastcall edit_node_from_xml_hook(int arg);
-static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len);
 
-static void __declspec(naked) node_from_xml_new()
+static void __cdecl node_from_xml_new(void* node, char* data, int* len)
 {
-	// PD2 seems to be using some weird calling convention, that's like MS fastcall but
-	// with a caller-restored stack. Thus we have to use assembly to bridge to it.
-	// TODO what do we have to clean up?
-	__asm
-	{
-		push[esp] // since the caller is not expecting us to pop, duplicate the top of the stack
-		call node_from_xml_new_fastcall
-		retn
-	}
-}
-
-static void __fastcall do_xmlload_invoke(void *node, char *data, int *len)
-{
-	__asm
-	{
-		call node_from_xml
-	}
-	// The stack gets cleaned up by the MSVC-generated assembly, since we're not using __declspec(naked)
-}
-
-static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *len) {
 	char *modded = pd2hook::tweaker::tweak_pd2_xml(data, *len);
 	int modLen = *len;
 
@@ -118,7 +105,7 @@ static void __fastcall node_from_xml_new_fastcall(void *node, char *data, int *l
 	}
 
 	edit_node_from_xml_hook(false);
-	do_xmlload_invoke(node, modded, &modLen);
+	node_from_xml(node, modded, &modLen);
 	edit_node_from_xml_hook(true);
 
 	pd2hook::tweaker::free_tweaked_pd2_xml(modded);

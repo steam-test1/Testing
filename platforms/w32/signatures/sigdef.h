@@ -75,19 +75,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tointeger, size_t, "\x55\x8B\xEC\x83\xE4\xF
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tonumber, lua_Number, "\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x08\xFF\x75\x0C\xFF\x75\x08\xE8\x00\x00\x00\x00\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF2\x77\x06\xDD", "xxxxxxxxxxxxxxxx????xxxxxxxxxxxx", 0, lua_State*, int)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_tolstring, const char*, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x53\x8B\x5C\x24\x2C\x56\x8B\x74\x24\x34", "xxxx????xxxxxxxxxxxxxxxx", 0, lua_State*, int, size_t*)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_objlen, size_t, "\x83\xEC\x24\xA1\x00\x00\x00\x00\x33\xC4\x89\x44\x24\x20\x8B\x44", "xxxx????xxxxxxxx", 0, lua_State*, int)
-
-// Signatures differ between Desktop and VR
-CREATE_SEPARATE_CALLABLE_SIGNATURE(
-	lua_touserdata, void*,
-	"\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8\x53\xD0\xFE\xFF******\x83\xF9\xF3\x75\x06\x8B\x00\x83\xC0\x18\xC3\x83\xF9",
-	"xxxxxxxxxxxxx??????xxxxxxxxxxxxx",
-	0,
-	"\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8\x83\xD2\xFE\xFF******\x83\xF9\xF3\x75\x06\x8B\x00\x83\xC0\x18\xC3\x83\xF9",
-	"xxxxxxxxxxxxx??????xxxxxxxxxxxxx",
-	0,
-	lua_State*,
-	int
-)
+CREATE_NORMAL_CALLABLE_SIGNATURE(lua_touserdata, void*, "\xFF\x74\x24\x08\xFF\x74\x24\x08\xE8****\x8B\x48\x04\x83\xC4\x08\x83\xF9\xF3", "xxxxxxxxx????xxxxxxxxx", 0, lua_State*, int)
 
 // This is actually luaL_loadfilex() (as per Lua 5.2) now. The new parameter corresponds to mode, and specifying NULL causes Lua
 // to default to "bt", i.e. 'binary and text'
@@ -148,12 +136,7 @@ CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_checkudata, int, "\x56\x8B\x74\x24\x08\x57
 CREATE_NORMAL_CALLABLE_SIGNATURE(luaL_error, int, "\x8D\x44\x24\x0C\x50\xFF\x74\x24\x0C\xFF\x74\x24\x0C\xE8\x00\x00\x00\x00\x83\xC4\x0C\x50\xFF\x74\x24\x08\xE8", "xxxxxxxxxxxxxx????xxxxxxxxx", 0, lua_State*, const char*, ...)
 CREATE_NORMAL_CALLABLE_SIGNATURE(lua_error, int, "\x56\x8B\x74\x24\x08\x57\x56\xE8\x00\x00\x00\x00\x83\xC4\x04\x85\xC0\x74\x4A\x8B\x4E\x1C\x8B\x7E\x14\x03\xC8\x8B\x46\x08\x83\xA0", "xxxxxxxx????xxxxxxxxxxxxxxxxxxxx", 0, lua_State*)
 
-// Note that previously the desktop and VR binaries were built differently, for example the normal binary (IIRC)
-// used cdecl as the default calling convention (/Gd), while the VR version used fastcall by default (/Gr).
-// In update 199 (or 199.3?) they switched the desktop binary to use the VR signatures. While it broke SBLT at
-// the time, it means we don't have to maintain two sets of signatures.
-// (previously these were node_from_xml, try_open_base and luaL_newstate)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B\xEC\x83\xE4\xF8\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x83\xEC\x28\x53\x56\x57\x8B\xDA\x8B\xF9\xC7\x44\x24\x18\x00\x00\x00\x00\xC7\x44\x24\x1C\x00\x00\x00\x00\xC7\x44\x24\x20\x00\x00\x00\x00", "xxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int)
+CREATE_NORMAL_CALLABLE_SIGNATURE(node_from_xml, void, "\x55\x8B\xEC\x6A\xFF\x68\x00\x00\x00\x00\x64\xA1\x00\x00\x00\x00\x50\x83\xEC\x18\x56\x57\xA1\x00\x00\x00\x00\x33\xC5\x50\x8D\x45\xF4\x64\xA3\x00\x00\x00\x00\xC7\x45\xE8\x00\x00\x00\x00\xC7\x45\xEC\x00\x00\x00\x00\xC7\x45\xF0\x00\x00\x00\x00", "xxxxxx????xxxxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, void*, char*, int*)
 
 // The four different try_open functions, each one with a different resolver to filter files
 // Unfortunately, the language, english, and funcptr resolvers are identical bar for a different function call
@@ -163,16 +146,15 @@ CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, node_from_xml, void, "\x55\x8B
 #ifdef INCLUDE_TRY_OPEN_FUNCTIONS
 extern std::vector<void*> try_open_functions;
 #endif
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, try_open_property_match_resolver, int, "\x6a\xff\x68????\x64\xa1\x00\x00\x00\x00\x50\x64\x89\x25\x00\x00\x00\x00\x81\xec\x54\x01\x00\x00\xc7\x44\x24\x04\x00", "xxx????xxxxxxxxxxxxxxxxxxxxxxxxx", 0)
 
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x56\xFF\x74\x24\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxx????xxx", 0, int*, int*)
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x8B\x44\x24\x0C\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxx", 0, char, char, int)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, do_game_update, void*, "\x55\x8B\xEC\x56\xFF\x75\x0C\x8B\xF1\x68\x00\x00\x00\x00\xFF\x36\xE8", "xxxxxxxxxx????xxx", 0, int*, int*)
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, luaL_newstate, int, "\x55\x8B\xEC\x8B\x45\x10\x56\x8B\xF1\x85\xC0\x75\x08\x50\x68", "xxxxxxxxxxxxxxx", 0, char, char, int)
 
 // Since the start of this function is very generic, grab a later section and seek backwards
 // Also note about stack_pad: for whatever reason it seems the function pops eight extra bytes, so
 // all the calls to it in-game I saw subtracted eight from ESP before pushing their arguments. I
 // don't know *why* it would be doing this, but here's an easy way to compensate for it:
-CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, Archive_ctor, void, "\x8b\x44\x24\x20\xc7\x44\x24\x10\x00\x00\x00\x00\x89\x46\x18\x8b\x44\x24\x24\x89\x46\x1c\x8b\x44\x24\x28", "xxxxxxxxxxxxxxxxxxxxxxxxxx", -59, void* name_stdstr, void* datastore, int64_t pos, int64_t size, bool ukn_prob_compression, uint64_t stack_pad);
+CREATE_CALLABLE_CLASS_SIGNATURE(SignatureVR_Both, Archive_ctor, void, "\xE8\x00\x00\x00\x00\x8B\x45\x10\x89\x46\x18\x8B\x45\x14\x89\x46\x1C\x8B\x45\x18\x89\x46\x20\x8B\x45\x1C", "x????xxxxxxxxxxxxxxxxxxxxx", -65, void* name_stdstr, void* datastore, int64_t pos, int64_t size, bool ukn_prob_compression, uint64_t stack_pad);
 
 // Some internal LuaJIT bits and pieces we can use to implement LuaJIT methods inlined by the compiler
 CREATE_LUAJIT_CALLABLE_SIGNATURE(lj_cf_rawset, int, "\x56\x8B\x74\x24\x08\x8B\x46\x10\x8B\x4E\x14\x3B\xC1\x0F\x83\x85\x00\x00\x00\x83\x78\x04\xF4\x75\x7F\x8D\x50\x08\x3B\xD1\x73\x5E", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0, lua_State*)

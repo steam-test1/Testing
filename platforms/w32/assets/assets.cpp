@@ -48,14 +48,6 @@ typedef void(__thiscall* try_open_t)(void* this_, void* archive, int a, int b, b
 static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, int u1, int u2,
                       blt::idstring type, blt::idstring name);
 
-#define DECLARE_PASSTHROUGH(func)                                                                        \
-	static subhook::Hook hook_##func;                                                                    \
-	void __fastcall stub_##func(void* this_, int edx, void* archive, int u1, int u2, blt::idstring type, \
-	                            blt::idstring name)                                                      \
-	{                                                                                                    \
-		hook_load((try_open_t)func, hook_##func, this_, archive, u1, u2, type, name);                    \
-	}
-
 #define DECLARE_PASSTHROUGH_ARRAY(id)                                                                    \
 	static subhook::Hook hook_##id;                                                                      \
 	void __fastcall stub_##id(void* this_, int edx, void* archive, int u1, int u2, blt::idstring type,   \
@@ -64,12 +56,11 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 		hook_load((try_open_t)try_open_functions.at(id), hook_##id, this_, archive, u1, u2, type, name); \
 	}
 
-DECLARE_PASSTHROUGH(try_open_property_match_resolver);
-
-// Three hooks for the other try_open functions: language_resolver, english_resolver and funcptr_resolver
+// Four hooks for the other try_open functions: property_match_resolver, language_resolver, english_resolver and funcptr_resolver
 DECLARE_PASSTHROUGH_ARRAY(0)
 DECLARE_PASSTHROUGH_ARRAY(1)
 DECLARE_PASSTHROUGH_ARRAY(2)
+DECLARE_PASSTHROUGH_ARRAY(3)
 
 static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* archive, int u1, int u2,
                       blt::idstring type, blt::idstring name)
@@ -110,17 +101,13 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 
 void blt::win32::InitAssets()
 {
-#define SETUP_PASSTHROUGH(func) hook_##func.Install(func, stub_##func)
 #define SETUP_PASSTHROUGH_ARRAY(id) hook_##id.Install(try_open_functions.at(id), stub_##id)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-cast"
-	SETUP_PASSTHROUGH(try_open_property_match_resolver);
-
 	if (!try_open_functions.empty())
 		SETUP_PASSTHROUGH_ARRAY(0);
 	if (try_open_functions.size() > 1)
 		SETUP_PASSTHROUGH_ARRAY(1);
 	if (try_open_functions.size() > 2)
 		SETUP_PASSTHROUGH_ARRAY(2);
-#pragma clang diagnostic pop
+	if (try_open_functions.size() > 3)
+		SETUP_PASSTHROUGH_ARRAY(3);
 }

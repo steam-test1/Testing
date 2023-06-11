@@ -3,7 +3,10 @@
 #include "InitState.h"
 #include "platform.h"
 
-using namespace std;
+#include "plugins/native_db_hooks.h"
+
+#include <functional>
+
 using namespace blt::plugins;
 
 // Don't use these funcdefs when porting to GNU+Linux, as it doesn't need
@@ -39,9 +42,20 @@ static bool is_active_state(lua_State *L)
 	return pd2hook::check_active_state(L);
 }
 
+void pd2_db_hook_asset_file(const char* name, const char* ext, std::function<void(std::vector<uint8_t>*)> replacer) {
+    blt::idstring nameids = blt::idstring(name);
+    blt::idstring extids = blt::idstring(ext);
+
+    blt::plugins::dbhook::DBTargetFile* file = nullptr;
+
+    blt::plugins::dbhook::registerAssetHook(name, ext, false, &file);
+
+    file->setReplacer(replacer);
+}
+
 static void * get_func(const char* name)
 {
-	string str = name;
+	std::string str = name;
 
 	if (str == "pd2_log")
 	{
@@ -58,7 +72,9 @@ static void * get_func(const char* name)
 	else if (str == "lua_rawequal")
 	{
 		return &lua_rawequal;
-	}
+	} else if(str == "pd2_db_hook_asset_file") {
+        return &pd2_db_hook_asset_file;
+    }
 
 	return blt::platform::win32::get_lua_func(name);
 }
@@ -76,7 +92,7 @@ WindowsPlugin::WindowsPlugin(std::string file) : Plugin(file)
 {
 	module = LoadLibraryA(file.c_str());
 
-	if (!module) throw string("Failed to load module: ERR") + to_string(GetLastError());
+	if (!module) throw std::string("Failed to load module: ERR") + std::to_string(GetLastError());
 
 	Init();
 

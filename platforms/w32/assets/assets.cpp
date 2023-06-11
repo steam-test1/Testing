@@ -13,9 +13,8 @@
 
 #include <string>
 #include <tweaker/db_hooks.h>
+#include <plugins/native_db_hooks.h>
 #include <utility>
-
-using pd2hook::tweaker::dbhook::hook_asset_load;
 
 // A wrapper class to store strings in the format that PAYDAY 2 does
 // Since Microsoft might (and it seems they have) change their string class, we
@@ -69,7 +68,9 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	BLTAbstractDataStore* datastore = nullptr;
 	int64_t pos = 0, len = 0;
 	std::string ds_name;
-	bool found = hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
+
+    bool found = pd2hook::tweaker::dbhook::hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
+    if (!found) found = blt::plugins::dbhook::hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
 
 	// If we do need to load a custom asset as a result of that, do so now
 	// That just means making our own version of of the archive
@@ -88,7 +89,10 @@ static void hook_load(try_open_t orig, subhook::Hook& hook, void* this_, void* a
 	bool probably_not_loaded_flag = *(bool*)((char*)archive + 0x30);
 	if (probably_not_loaded_flag)
 	{
-		if (hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, true))
+        found = pd2hook::tweaker::dbhook::hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
+        if (!found) found = blt::plugins::dbhook::hook_asset_load(blt::idfile(name, type), &datastore, &pos, &len, ds_name, false);
+
+		if (found)
 		{
 			// Note the deadbeef is for the stack padding argument - see the comment on this signature's declaration
 			// for more information.

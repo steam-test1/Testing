@@ -94,7 +94,7 @@ const char* pd2_get_mod_directory_internal(const char* nativeModulePath)
 
 unsigned long long pd2_create_hash(const char* str)
 {
-	return blt::plugins::environment::hashString(str);
+	return blt::idstring_hash(str);
 }
 
 static void* get_func(const char* name)

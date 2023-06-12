@@ -11,8 +11,6 @@ namespace blt
 		{
 			bool isVr();
 			const char* getModDirectory(const char* nativeModulePath);
-
-			unsigned long long hashString(const char* str);
 		} // namespace environment
 	} // namespace plugins
 } // namespace blt

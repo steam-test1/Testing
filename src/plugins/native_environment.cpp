@@ -27,8 +27,3 @@ const char* blt::plugins::environment::getModDirectory(const char* nativeModuleP
 {
 	return "";
 }
-
-unsigned long long blt::plugins::environment::hashString(const char* str)
-{
-	return blt::idstring_hash(str);
-}

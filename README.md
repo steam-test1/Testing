@@ -21,47 +21,6 @@ Documentation for the BLT can be found on the [GitHub Wiki](https://github.com/J
 
 Documentation for SuperBLT can be found on the [SuperBLT Website](https://superblt.znix.xyz).
 
-## Contributors
-- SuperBLT Team
-	* [Campbell Suter](https://znix.xyz)
-
-- Payday 2 BLT Team
-	* [James Wilkinson](http://jameswilko.com/) ([Twitter](http://twitter.com/_JamesWilko))
-	* [SirWaddlesworth](http://genj.io/)
-	* [Will Donohoe](https://will.io/)
-
-- BLT4L Team
-	* [Roman Hargrave](https://github.com/RomanHargrave)
-	* [Campbell Suter](https://znix.xyz)
-	* [Leonard Koenig](https://github.com/LeonardKoenig)
-
-- Contributors, Translators, Testers and more
-	* saltisgood
-	* Kail
-	* Dougley
-	* awcjack
-	* BangL
-	* chromKa
-	* xDarkWolf
-	* Luffyyy
-	* NHellFire
-	* TdlQ
-	* Mrucux7
-	* Simon
-	* goontest
-	* aayanl
-	* cjur3
-	* Kilandor
-	* Joel Juvél
-	* Brskt
-	* [Dribbleondo](http://twitter.com/dribbleondo)
-	* zekesonxx
-	* TRSGuy
-	* luck3y
-	* Ozymandias
-	* BreakinBenny
-	* and others who haven't been added yet
-
 ## Development
 
 How to contribute to SuperBLT:

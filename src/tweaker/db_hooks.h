@@ -15,7 +15,7 @@ namespace pd2hook::tweaker::dbhook
         uint8_t* data;
         size_t size;
         unsigned long long name;
-        unsigned long long longext;
+        unsigned long long ext;
     };
 
     typedef void (*db_file_replacer_t)(FileData*);

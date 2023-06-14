@@ -518,10 +518,6 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 
 		target.replacer(&fd);
 
-		std::string msg =
-			"Replaced " + std::to_string(data.size()) + " bytes with " + std::to_string(fd.size) + " bytes";
-		PD2HOOK_LOG_LOG(msg.c_str());
-
 		auto* ds = new BLTStringDataStore(std::string((char*)fd.data, fd.size));
 
 		*out_datastore = ds;

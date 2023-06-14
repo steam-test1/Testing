@@ -1,13 +1,12 @@
-#include "plugins/plugins.h"
-#include "util/util.h"
 #include "InitState.h"
 #include "platform.h"
+#include "plugins/plugins.h"
+#include "util/util.h"
 
-#include "plugins/native_db_hooks.h"
-
-#include <functional>
+#include "tweaker/db_hooks.h"
 
 using namespace blt::plugins;
+using namespace pd2hook::tweaker::dbhook;
 
 // Don't use these funcdefs when porting to GNU+Linux, as it doesn't need
 // any kind of getter function because the PD2 binary isn't stripped
@@ -42,15 +41,58 @@ static bool is_active_state(lua_State *L)
 	return pd2hook::check_active_state(L);
 }
 
-void pd2_db_hook_asset_file(const char* name, const char* ext, std::function<void(std::vector<uint8_t>*)> replacer) {
-    blt::idstring nameids = blt::idstring(name);
-    blt::idstring extids = blt::idstring(ext);
+enum class HookMode
+{
+	REPLACER = 0,
+	PLAIN_FILE,
+	DIRECT_BUNDLE,
+};
 
-    blt::plugins::dbhook::DBTargetFile* file = nullptr;
+void db_hook_asset_file(const char* name, const char* ext, db_file_replacer_t replacer,
+                        const char* plain_file, const char* direct_bundle_name, const char* direct_bundle_ext,
+                        HookMode mode)
+{
+	pd2hook::tweaker::dbhook::DBTargetFile* target = nullptr;
 
-    blt::plugins::dbhook::registerAssetHook(name, ext, false, &file);
+	pd2hook::tweaker::dbhook::register_asset_hook(name, ext, false, &target);
 
-    file->setReplacer(replacer);
+	if (mode == HookMode::REPLACER)
+	{
+		target->SetReplacer(replacer);
+	}
+	else if (mode == HookMode::PLAIN_FILE)
+	{
+		target->SetPlainFile(plain_file);
+	}
+	else if (mode == HookMode::DIRECT_BUNDLE)
+	{
+		target->SetDirectBundle(direct_bundle_name, direct_bundle_ext);
+	}
+}
+
+FileData db_read_file(const char* name, const char* ext)
+{
+    return find_file(name, ext);
+}
+
+void db_free_file(FileData data)
+{
+    delete[] data.data;
+}
+
+bool db_file_exists(const char* name, const char* ext)
+{
+	return file_exists(name, ext);
+}
+
+bool is_vr()
+{
+	return pd2hook::Util::IsVr();
+}
+
+unsigned long long create_hash(const char* str)
+{
+	return blt::idstring_hash(str);
 }
 
 static void * get_func(const char* name)
@@ -72,9 +114,32 @@ static void * get_func(const char* name)
 	else if (str == "lua_rawequal")
 	{
 		return &lua_rawequal;
-	} else if(str == "pd2_db_hook_asset_file") {
-        return &pd2_db_hook_asset_file;
+	}
+	// wren and lua function parity
+	else if (str == "pd2_db_hook_asset_file")
+	{
+		return &db_hook_asset_file;
+	}
+	else if (str == "pd2_db_read_file")
+	{
+		return &db_read_file;
+	}
+    else if(str == "pd2_db_free_file")
+    {
+        return &db_free_file;
     }
+	else if (str == "pd2_db_file_exists")
+	{
+		return &db_file_exists;
+	}
+	else if (str == "pd2_create_hash")
+	{
+		return &create_hash;
+	}
+	else if (str == "pd2_is_vr")
+	{
+		return &is_vr;
+	}
 
 	return blt::platform::win32::get_lua_func(name);
 }

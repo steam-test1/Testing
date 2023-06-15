@@ -47,7 +47,6 @@ namespace pd2hook::tweaker::dbhook
         void SetFallback(bool fallback);
         void SetPlainFile(std::string path);
         void SetDirectBundle(blt::idfile bundle);
-        void SetDirectBundle(std::string name, std::string ext);
         bool HasReplacer();
         bool HasPlainFile();
         bool HasDirectBundle();
@@ -65,9 +64,9 @@ namespace pd2hook::tweaker::dbhook
 	bool hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore, int64_t* out_pos,
 	                     int64_t* out_len, std::string& out_name, bool fallback_mode);
 
-    void register_asset_hook(std::string name, std::string ext, bool fallback, DBTargetFile** out_target);
+    void register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback, DBTargetFile** out_target);
 
-    bool file_exists(std::string name, std::string ext);
+    bool file_exists(blt::idstring name, blt::idstring ext);
 
-    FileData find_file(std::string name, std::string ext);
+    FileData find_file(blt::idstring name, blt::idstring ext);
 } // namespace pd2hook::tweaker::dbhook

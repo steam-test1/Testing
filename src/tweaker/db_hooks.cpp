@@ -472,51 +472,17 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 	else if (target.HasReplacer())
 	{
-		DslFile* file = DieselDB::Instance()->Find(target.id.name, target.id.ext);
-
-		if (!file)
-		{
-			char buff[1024];
-			memset(buff, 0, sizeof(buff));
-			snprintf(buff, sizeof(buff) - 1, "Failed to open hooked asset file " IDPFP " while loading " IDPFP,
-			         target.id.name, target.id.ext, asset_file.name, asset_file.ext);
-			PD2HOOK_LOG_ERROR(buff);
-
-#ifdef _WIN32
-			MessageBox(nullptr, "Failed to load hooked asset - file not found. See log for more information.",
-			           "Native Plugin Error", MB_OK);
-			ExitProcess(1);
-#else
-			abort();
-#endif
-		}
-
-		std::ifstream stream(file->bundle->path, std::ios::binary);
-		if (stream.fail())
-		{
-			std::string message = "Failed to open bundle file containing the asset - " + file->bundle->path;
-			PD2HOOK_LOG_ERROR(message.c_str());
-
-#ifdef _WIN32
-			MessageBox(nullptr,
-			           "Failed to load hooked asset - failed to open bundle file containing the asset. See log for more information.",
-			           "Native Plugin Error", MB_OK);
-			ExitProcess(1);
-#else
-			abort();
-#endif
-		}
-
-		std::vector<uint8_t> data = file->ReadContents(stream);
-
-		FileData fd = {
-			data.data(),
-			data.size(),
+		pd2hook::tweaker::dbhook::FileData fd = {
+			nullptr,
+			0,
 			target.id.name,
 			target.id.ext,
 		};
 
 		target.replacer(&fd);
+
+        std::string msg = "New size: " + std::to_string(fd.size);
+        PD2HOOK_LOG_WARN(msg.c_str());
 
 		auto* ds = new BLTStringDataStore(std::string((char*)fd.data, fd.size));
 
@@ -533,50 +499,44 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 }
 
 // for native plugin stuff
-void pd2hook::tweaker::dbhook::register_asset_hook(std::string name, std::string ext, bool fallback, DBTargetFile** out_target)
+void pd2hook::tweaker::dbhook::register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback, DBTargetFile** out_target)
 {
-	blt::idstring nameids = blt::idstring_hash(name.c_str());
-	blt::idstring extids = blt::idstring_hash(ext.c_str());
-
-	blt::idfile file(nameids, extids);
+	blt::idfile file(name, ext);
 
 	if (overriddenFiles.count(file))
 	{
-		std::string message = "Duplicate asset registration for " + name + "." + ext;
-		PD2HOOK_LOG_ERROR(message.c_str());
-		return;
+		char buff[1024];
+		memset(buff, 0, sizeof(buff));
+		snprintf(buff, sizeof(buff) - 1, "Duplicate asset registration for " IDPFP, name, ext);
+		PD2HOOK_LOG_WARN(buff);
 	}
 
 	auto entry = std::make_shared<DBTargetFile>(file);
 	overriddenFiles[file] = entry;
 	*out_target = entry.get();
 
-	std::string msg = "Registered asset hook for " + name + "." + ext;
-	PD2HOOK_LOG_LOG(msg.c_str());
+	char buff[1024];
+    memset(buff, 0, sizeof(buff));
+    snprintf(buff, sizeof(buff) - 1, "Registerd asset hook for " IDPFP, name, ext);
+    PD2HOOK_LOG_LOG(buff);
 }
 
-bool pd2hook::tweaker::dbhook::file_exists(std::string name, std::string ext)
+bool pd2hook::tweaker::dbhook::file_exists(blt::idstring name, blt::idstring ext)
 {
-	blt::idstring nameids = blt::idstring_hash(name.c_str());
-	blt::idstring extids = blt::idstring_hash(ext.c_str());
-
-	DslFile* file = DieselDB::Instance()->Find(nameids, extids);
+	DslFile* file = DieselDB::Instance()->Find(name, ext);
 
 	return file != nullptr;
 }
 
-pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(std::string name, std::string ext)
+pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(blt::idstring name, blt::idstring ext)
 {
-	blt::idstring nameids = blt::idstring_hash(name.c_str());
-	blt::idstring extids = blt::idstring_hash(ext.c_str());
-
-	DslFile* file = DieselDB::Instance()->Find(nameids, extids);
+	DslFile* file = DieselDB::Instance()->Find(name, ext);
 
 	if (!file)
 	{
 		char buff[1024];
 		memset(buff, 0, sizeof(buff));
-		snprintf(buff, sizeof(buff) - 1, "Failed to find asset " IDPFP, nameids, extids);
+		snprintf(buff, sizeof(buff) - 1, "Failed to find asset " IDPFP, name, ext);
 		PD2HOOK_LOG_ERROR(buff);
 
 #ifdef _WIN32
@@ -606,14 +566,19 @@ pd2hook::tweaker::dbhook::FileData pd2hook::tweaker::dbhook::find_file(std::stri
 
 	std::vector<uint8_t> data = file->ReadContents(stream);
 
+	uint8_t* outData = new uint8_t[data.size()];
+	memcpy(outData, data.data(), data.size());
+
 	stream.close();
 
-	return {
-        data.data(),
-        data.size(),
-        nameids,
-        extids,
-    };
+	pd2hook::tweaker::dbhook::FileData fd = {
+		outData,
+		data.size(),
+		name,
+		ext,
+	};
+
+	return fd;
 }
 
 //////////////////////////////////////
@@ -639,16 +604,6 @@ void DBTargetFile::SetDirectBundle(blt::idfile bundle)
 {
 	clear_sources();
 	this->direct_bundle = bundle;
-}
-
-void DBTargetFile::SetDirectBundle(std::string name, std::string ext)
-{
-	clear_sources();
-
-	blt::idstring nameids = blt::idstring_hash(name.c_str());
-	blt::idstring extids = blt::idstring_hash(ext.c_str());
-
-	this->direct_bundle = blt::idfile(nameids, extids);
 }
 
 bool DBTargetFile::HasReplacer()

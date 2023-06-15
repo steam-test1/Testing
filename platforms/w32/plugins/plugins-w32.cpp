@@ -41,36 +41,37 @@ static bool is_active_state(lua_State *L)
 	return pd2hook::check_active_state(L);
 }
 
-enum class HookMode
+void db_hook_asset_file_replacer(blt::idstring name, blt::idstring ext, db_file_replacer_t replacer)
 {
-	REPLACER = 0,
-	PLAIN_FILE,
-	DIRECT_BUNDLE,
-};
-
-void db_hook_asset_file(const char* name, const char* ext, db_file_replacer_t replacer,
-                        const char* plain_file, const char* direct_bundle_name, const char* direct_bundle_ext,
-                        HookMode mode)
-{
-	pd2hook::tweaker::dbhook::DBTargetFile* target = nullptr;
+    pd2hook::tweaker::dbhook::DBTargetFile* target = nullptr;
 
 	pd2hook::tweaker::dbhook::register_asset_hook(name, ext, false, &target);
 
-	if (mode == HookMode::REPLACER)
-	{
-		target->SetReplacer(replacer);
-	}
-	else if (mode == HookMode::PLAIN_FILE)
-	{
-		target->SetPlainFile(plain_file);
-	}
-	else if (mode == HookMode::DIRECT_BUNDLE)
-	{
-		target->SetDirectBundle(direct_bundle_name, direct_bundle_ext);
-	}
+    target->SetReplacer(replacer);
 }
 
-FileData db_read_file(const char* name, const char* ext)
+void db_hook_asset_file_plain_file(blt::idstring name, blt::idstring ext, const char* plain_file)
+{
+    pd2hook::tweaker::dbhook::DBTargetFile* target = nullptr;
+
+	pd2hook::tweaker::dbhook::register_asset_hook(name, ext, false, &target);
+
+    target->SetPlainFile(plain_file);
+}
+
+void db_hook_asset_file_direct_bundle(blt::idstring name, blt::idstring ext, blt::idstring direct_bundle_name, blt::idstring direct_bundle_ext)
+{
+    pd2hook::tweaker::dbhook::DBTargetFile* target = nullptr;
+
+	pd2hook::tweaker::dbhook::register_asset_hook(name, ext, false, &target);
+
+    blt::idfile bundle = blt::idfile(direct_bundle_name, direct_bundle_ext);
+
+    target->SetDirectBundle(bundle);
+}
+
+
+FileData db_read_file(blt::idstring name, blt::idstring ext)
 {
     return find_file(name, ext);
 }
@@ -80,9 +81,9 @@ void db_free_file(FileData data)
     delete[] data.data;
 }
 
-bool db_file_exists(const char* name, const char* ext)
+bool db_file_exists(blt::idstring name, blt::idstring ext)
 {
-	return file_exists(name, ext);
+    return file_exists(name, ext);
 }
 
 bool is_vr()
@@ -116,27 +117,35 @@ static void * get_func(const char* name)
 		return &lua_rawequal;
 	}
 	// wren and lua function parity
-	else if (str == "pd2_db_hook_asset_file")
+	else if (str == "db_hook_asset_file" || str == "db_hook_asset_file_replacer")
 	{
-		return &db_hook_asset_file;
+		return &db_hook_asset_file_replacer;
 	}
-	else if (str == "pd2_db_read_file")
+    else if (str == "db_hook_asset_file_plain_file")
+    {
+        return &db_hook_asset_file_plain_file;
+    }
+    else if (str == "db_hook_asset_file_direct_bundle")
+    {
+        return &db_hook_asset_file_direct_bundle;
+    }
+	else if (str == "db_read_file")
 	{
 		return &db_read_file;
 	}
-    else if(str == "pd2_db_free_file")
+    else if(str == "db_free_file")
     {
         return &db_free_file;
     }
-	else if (str == "pd2_db_file_exists")
+	else if (str == "db_file_exists")
 	{
 		return &db_file_exists;
 	}
-	else if (str == "pd2_create_hash")
+	else if (str == "create_hash")
 	{
 		return &create_hash;
 	}
-	else if (str == "pd2_is_vr")
+	else if (str == "is_vr")
 	{
 		return &is_vr;
 	}

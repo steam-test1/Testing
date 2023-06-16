@@ -42,7 +42,7 @@ namespace blt
 	using std::cout;
 	using std::string;
 	using subhook::Hook;
-	using subhook::HookOption64BitOffset;
+	using subhook::HookFlag64BitOffset;
 
 	void* (*dsl_lua_newstate) (dsl::LuaInterface* /* this */, bool, bool, dsl::LuaInterface::Allocation);
 	void* (*do_game_update)   (void* /* this */);
@@ -210,12 +210,12 @@ namespace blt
 		 */
 
 		{
-			gameUpdateDetour.Install    ((void*) do_game_update,                (void*) dt_Application_update, HookOption64BitOffset);
-			luaNewStateDetour.Install   ((void*) dsl_lua_newstate,              (void*) dt_dsl_lua_newstate, HookOption64BitOffset);
-			luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookOption64BitOffset);
-			luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookOption64BitOffset);
+			gameUpdateDetour.Install    ((void*) do_game_update,                (void*) dt_Application_update, HookFlag64BitOffset);
+			luaNewStateDetour.Install   ((void*) dsl_lua_newstate,              (void*) dt_dsl_lua_newstate, HookFlag64BitOffset);
+			luaCloseDetour.Install      ((void*) &lua_close,                    (void*) dt_lua_close, HookFlag64BitOffset);
+			luaCallDetour.Install       ((void*) &lua_call,                     (void*) dt_lua_call, HookFlag64BitOffset);
 
-			nodeFromXMLDetour.Install   ((void*) node_from_xml,                 (void*) dt_node_from_xml, HookOption64BitOffset);
+			nodeFromXMLDetour.Install   ((void*) node_from_xml,                 (void*) dt_node_from_xml, HookFlag64BitOffset);
 		}
 
 		init_asset_hook();

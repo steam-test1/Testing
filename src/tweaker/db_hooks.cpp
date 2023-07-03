@@ -472,19 +472,16 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 	else if (target.HasReplacer())
 	{
-		pd2hook::tweaker::dbhook::FileData fd = {
+		pd2hook::tweaker::dbhook::FileData* fd = new pd2hook::tweaker::dbhook::FileData {
 			nullptr,
 			0,
 			target.id.name,
 			target.id.ext,
 		};
 
-		target.replacer(&fd);
+		target.replacer(fd);
 
-        std::string msg = "New size: " + std::to_string(fd.size);
-        PD2HOOK_LOG_WARN(msg.c_str());
-
-		auto* ds = new BLTStringDataStore(std::string((char*)fd.data, fd.size));
+		auto* ds = new BLTStringDataStore(std::string((char*)fd->data, fd->size));
 
 		*out_datastore = ds;
 		*out_len = ds->size();

@@ -3,8 +3,8 @@
 	* [Hoppip](https://hoppip.at)
 
 - Payday 2 BLT Team
-	* [James Wilkinson](http://jameswilko.com/) ([Twitter](http://twitter.com/_JamesWilko))
-	* [SirWaddlesworth](http://genj.io/)
+	* [James Wilkinson](https://jameswilko.com/) ([Twitter](https://twitter.com/_JamesWilko))
+	* [SirWaddlesworth](https://genj.io/)
 	* [Will Donohoe](https://will.io/)
 
 - BLT4L Team
@@ -27,7 +27,7 @@
 	* Dom
 	* DorentuZ
 	* Dougley
-	* [Dribbleondo](http://twitter.com/dribbleondo)
+	* [Dribbleondo](https://twitter.com/dribbleondo)
 	* ElCabe99
 	* gabsF
 	* goontest

@@ -3,6 +3,7 @@
 //
 
 #include <wren.hpp>
+#include <string>
 
 #include "wren_lua_interface.h"
 

@@ -448,16 +448,16 @@ namespace blt
 
 		// Add the 'add_members' hook
 		dslDbAddMembers.Install((void*)dsl_db_add_members, (void*)dt_dsl_db_add_members,
-		                        subhook::HookOption64BitOffset);
+		                        subhook::HookFlag64BitOffset);
 
 		// Add the 'script_has' hook
 		dslMainDbScriptHas.Install((void*)maindb_script_has, (void*)dt_maindb_script_has,
-		                           subhook::HookOption64BitOffset);
+		                           subhook::HookFlag64BitOffset);
 
 		// Hook each of the four loading functions
 #define INSTALL_TRY_OPEN_HOOK(id)                                                                    \
 	dslDbTryOpenDetour##id.Install((void*)dsl_db_try_open_##id, (void*)dt_dsl_db_try_open_hook_##id, \
-	                               subhook::HookOption64BitOffset);
+	                               subhook::HookFlag64BitOffset);
 		EACH_HOOK(INSTALL_TRY_OPEN_HOOK)
 	}
 

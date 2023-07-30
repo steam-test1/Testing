@@ -2,6 +2,7 @@
 
 #include <blt/libcxxstring.hh>
 #include <blt/elf_utils.hh>
+#include <cstdint>
 
 namespace dsl
 {

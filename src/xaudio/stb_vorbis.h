@@ -77,8 +77,10 @@ typedef struct
 // get general information about the file
 extern stb_vorbis_info stb_vorbis_get_info(stb_vorbis *f);
 
+#ifndef STB_VORBIS_NO_COMMENTS
 // get ogg comments
 extern stb_vorbis_comment stb_vorbis_get_comment(stb_vorbis *f);
+#endif
 
 // get the last error detected (clears it, too)
 extern int stb_vorbis_get_error(stb_vorbis *f);
@@ -92,6 +94,12 @@ extern void stb_vorbis_close(stb_vorbis *f);
 // it becomes valid again.
 // NOT WORKING YET after a seek with PULLDATA API
 extern int stb_vorbis_get_sample_offset(stb_vorbis *f);
+
+//  this function returns the count of returned samples from the beginning of the
+//  file. Functions "stb_vorbis_get_samples_*", "stb_vorbis_seek_*()" will
+//  affect the returned value. Use this call to get the accurate sample position
+//  during playback.
+extern int stb_vorbis_get_playback_sample_offset(stb_vorbis *f);
 
 // returns the current seek point within the file, or offset from the beginning
 // of the memory buffer. In pushdata mode it returns 0.

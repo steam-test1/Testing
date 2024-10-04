@@ -22,7 +22,6 @@
 #include <scriptdata/FontData.h>
 #include <scriptdata/ScriptData.h>
 #include <tweaker/db_hooks.h>
-#include <plugins/native_db_hooks.h>
 
 #define hook_remove(hookName) subhook::ScopedHookRemove _sh_remove_raii(&hookName)
 
@@ -285,9 +284,11 @@ namespace blt
 		int64_t pos = 0, len = 0;
 		std::string ds_name;
 		bool found = pd2hook::tweaker::dbhook::hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback);
-        if (!found) found = blt::plugins::dbhook::hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback);
+		if (!found)
+			found = blt::plugins::dbhook::hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback);
 
-        if (!found) return false;
+		if (!found)
+			return false;
 
 		archive_ctor(target, libcxxstring(ds_name), (CustomDataStore*)datastore, pos, len, false, nullptr);
 		return true;

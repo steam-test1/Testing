@@ -35,7 +35,7 @@ namespace pd2hook
 		bool DirectoryExists(const std::string& dir);
 		bool CreateDirectorySingle(const std::string& dir);
 		bool CreateDirectoryPath(const std::string& dir);
-		// String split from http://stackoverflow.com/a/236803
+		// String split from https://stackoverflow.com/a/236803
 		void SplitString(const std::string &s, char delim, std::vector<std::string> &elems);
 		std::vector<std::string> SplitString(const std::string &s, char delim);
 		std::string GetDirectoryHash(std::string directory);

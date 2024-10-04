@@ -28,6 +28,7 @@
 PackageManager::find_t PackageManager::find = nullptr;
 PackageManager::resource_t PackageManager::resource = nullptr;
 
+using pd2hook::tweaker::dbhook::hook_asset_load;
 using namespace std;
 using namespace dsl;
 
@@ -283,13 +284,8 @@ namespace blt
 		BLTAbstractDataStore* datastore = nullptr;
 		int64_t pos = 0, len = 0;
 		std::string ds_name;
-		bool found = pd2hook::tweaker::dbhook::hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback);
-		if (!found)
-			found = blt::plugins::dbhook::hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback);
-
-		if (!found)
+		if (!hook_asset_load(id, &datastore, &pos, &len, ds_name, fallback))
 			return false;
-
 		archive_ctor(target, libcxxstring(ds_name), (CustomDataStore*)datastore, pos, len, false, nullptr);
 		return true;
 	}

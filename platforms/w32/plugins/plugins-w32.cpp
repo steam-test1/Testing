@@ -71,14 +71,16 @@ void db_hook_asset_file_direct_bundle(blt::idstring name, blt::idstring ext, blt
 	target->SetDirectBundle(bundle);
 }
 
-FileData db_read_file(blt::idstring name, blt::idstring ext)
+FileData* db_read_file(blt::idstring name, blt::idstring ext)
 {
-	return find_file(name, ext);
+	FileData fd = find_file(name, ext);
+	return new FileData(fd);
 }
 
-void db_free_file(FileData data)
+void db_free_file(FileData* data)
 {
-	delete[] data.data;
+	delete[] data->data;
+	delete data;
 }
 
 bool db_file_exists(blt::idstring name, blt::idstring ext)

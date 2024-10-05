@@ -5,20 +5,23 @@
 #pragma once
 
 #include <dbutil/Datastore.h>
+#include <optional>
 #include <platform.h>
 #include <wren.hpp>
-#include <optional>
 
 namespace pd2hook::tweaker::dbhook
 {
-    struct FileData {
-        uint8_t* data;
-        size_t size;
-        unsigned long long name;
-        unsigned long long ext;
-    };
+	// ABI stability: this struct is exposed in the plugin API.
+	// It's size is not however, so it can be extended without breaking the ABI.
+	struct FileData
+	{
+		uint8_t* data;
+		size_t size;
+		unsigned long long name;
+		unsigned long long ext;
+	};
 
-    typedef void (*db_file_replacer_t)(FileData*);
+	typedef void (*db_file_replacer_t)(FileData*);
 	class DBTargetFile
 	{
 	  public:
@@ -37,20 +40,20 @@ namespace pd2hook::tweaker::dbhook
 		WrenHandle* wren_loader_obj = nullptr;
 
 		/** To handle native plugin asset replacement */
-        db_file_replacer_t replacer = nullptr;
+		db_file_replacer_t replacer = nullptr;
 
 		explicit DBTargetFile(blt::idfile id) : id(id)
 		{
 		}
 
-        void SetReplacer(db_file_replacer_t replacer);
-        void SetFallback(bool fallback);
-        void SetPlainFile(std::string path);
-        void SetDirectBundle(blt::idfile bundle);
-        bool HasReplacer();
-        bool HasPlainFile();
-        bool HasDirectBundle();
-        bool HasWrenLoader();
+		void SetReplacer(db_file_replacer_t replacer);
+		void SetFallback(bool fallback);
+		void SetPlainFile(std::string path);
+		void SetDirectBundle(blt::idfile bundle);
+		bool HasReplacer();
+		bool HasPlainFile();
+		bool HasDirectBundle();
+		bool HasWrenLoader();
 
 		void clear_sources();
 	};
@@ -64,9 +67,9 @@ namespace pd2hook::tweaker::dbhook
 	bool hook_asset_load(const blt::idfile& asset_file, BLTAbstractDataStore** out_datastore, int64_t* out_pos,
 	                     int64_t* out_len, std::string& out_name, bool fallback_mode);
 
-    void register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback, DBTargetFile** out_target);
+	void register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback, DBTargetFile** out_target);
 
-    bool file_exists(blt::idstring name, blt::idstring ext);
+	bool file_exists(blt::idstring name, blt::idstring ext);
 
-    FileData find_file(blt::idstring name, blt::idstring ext);
+	FileData find_file(blt::idstring name, blt::idstring ext);
 } // namespace pd2hook::tweaker::dbhook

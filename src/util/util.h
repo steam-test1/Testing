@@ -45,7 +45,7 @@ namespace pd2hook
 		template<typename T>
 		std::string ToHex(T num);
 
-        bool IsVr();
+		bool IsVr();
 
 		// See hashing.cpp
 		typedef std::string(*DirectoryHashFunction)(std::string);

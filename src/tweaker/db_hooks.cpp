@@ -32,7 +32,7 @@ void DBTargetFile::clear_sources()
 {
 	plain_file.reset();
 	direct_bundle = blt::idfile();
-    replacer = nullptr;
+	replacer = nullptr;
 
 	if (wren_loader_obj)
 	{
@@ -319,7 +319,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	// TODO write to out_name somewhere
 
 	// Define these loading functions here, as we can use them either directly or after calling Wren
-	auto load_file = [&](const std::string& filename) {
+	auto load_file = [&](const std::string& filename)
+	{
 		BLTFileDataStore* ds = BLTFileDataStore::Open(filename);
 
 		if (!ds)
@@ -343,7 +344,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 		*out_len = ds->size();
 	};
 
-	auto load_bundle_item = [&](blt::idfile bundle_item) {
+	auto load_bundle_item = [&](blt::idfile bundle_item)
+	{
 		DslFile* file = DieselDB::Instance()->Find(bundle_item.name, bundle_item.ext);
 
 		// Abort if the file isn't found - most likely this would lead to a crash anyway since the PD2 version
@@ -472,7 +474,7 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 	}
 	else if (target.HasReplacer())
 	{
-		pd2hook::tweaker::dbhook::FileData* fd = new pd2hook::tweaker::dbhook::FileData {
+		pd2hook::tweaker::dbhook::FileData* fd = new pd2hook::tweaker::dbhook::FileData{
 			nullptr,
 			0,
 			target.id.name,
@@ -496,7 +498,8 @@ bool pd2hook::tweaker::dbhook::hook_asset_load(const blt::idfile& asset_file, BL
 }
 
 // for native plugin stuff
-void pd2hook::tweaker::dbhook::register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback, DBTargetFile** out_target)
+void pd2hook::tweaker::dbhook::register_asset_hook(blt::idstring name, blt::idstring ext, bool fallback,
+                                                   DBTargetFile** out_target)
 {
 	blt::idfile file(name, ext);
 
@@ -513,9 +516,9 @@ void pd2hook::tweaker::dbhook::register_asset_hook(blt::idstring name, blt::idst
 	*out_target = entry.get();
 
 	char buff[1024];
-    memset(buff, 0, sizeof(buff));
-    snprintf(buff, sizeof(buff) - 1, "Registerd asset hook for " IDPFP, name, ext);
-    PD2HOOK_LOG_LOG(buff);
+	memset(buff, 0, sizeof(buff));
+	snprintf(buff, sizeof(buff) - 1, "Registerd asset hook for " IDPFP, name, ext);
+	PD2HOOK_LOG_LOG(buff);
 }
 
 bool pd2hook::tweaker::dbhook::file_exists(blt::idstring name, blt::idstring ext)
@@ -620,7 +623,7 @@ bool DBTargetFile::HasDirectBundle()
 
 bool DBTargetFile::HasWrenLoader()
 {
-    return this->wren_loader_obj != nullptr;
+	return this->wren_loader_obj != nullptr;
 }
 
 //////////////////////////////////////
